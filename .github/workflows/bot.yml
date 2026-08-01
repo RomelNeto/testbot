@@ -1,10 +1,19 @@
 name: polymarket-sim-bot
 
+# Roda o bot automaticamente na nuvem do GitHub -- seu PC pode ficar
+# desligado. Dois gatilhos:
+#   1. "cycle": a cada 30 minutos, verifica trades novos das carteiras
+#      qualificadas e simula copy trading.
+#   2. "discover" + "rank": uma vez por semana, redescobre carteiras
+#      candidatas e reavalia os filtros de qualidade.
+# O estado (data/*.json, data/trade_log.csv) e commitado de volta no
+# repositorio a cada execucao, entao o bot "lembra" o progresso entre rodadas.
+
 on:
   schedule:
-    - cron: "*/30 * * * *"
-    - cron: "0 3 * * 1"
-  workflow_dispatch: {}
+    - cron: "*/30 * * * *"   # ciclo de monitoramento, a cada 30 min
+    - cron: "0 3 * * 1"      # descoberta + ranking, toda segunda 03:00 UTC
+  workflow_dispatch: {}       # permite rodar manualmente pelo botao "Run workflow"
 
 permissions:
   contents: write
@@ -25,7 +34,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Descoberta + ranking semanal
-        if: github.event.schedule == '0 3 * * 1'
+        if: github.event.schedule == '0 3 * * 1' || github.event_name == 'workflow_dispatch'
         run: |
           python main.py discover
           python main.py rank
@@ -34,8 +43,8 @@ jobs:
         if: github.event.schedule == '*/30 * * * *' || github.event_name == 'workflow_dispatch'
         run: python main.py cycle
 
-      - name: Gerar relatorio semanal (as segundas)
-        if: github.event.schedule == '0 3 * * 1'
+      - name: Gerar relatorio semanal (as segundas ou manual)
+        if: github.event.schedule == '0 3 * * 1' || github.event_name == 'workflow_dispatch'
         run: python report.py --days 7
 
       - name: Salvar estado no repositorio
