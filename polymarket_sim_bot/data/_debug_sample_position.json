@@ -1,3 +1,0 @@
-{
-  "_nota": "Este arquivo sera sobrescrito automaticamente na primeira execucao real com um exemplo de posicao retornado pela Data API. Use-o para confirmar os nomes de campo (ex.: realizedPnl, redeemable) e ajustar wallet_ranking.py se a API usar nomes diferentes."
-}
