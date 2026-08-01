@@ -1,0 +1,52 @@
+{
+  "market-0:Yes:0xAAA0000000000000000000000000000000AAA0-trade-0": {
+    "source_wallet": "0xAAA0000000000000000000000000000000AAA0",
+    "market_id": "market-0",
+    "market_question": "Mercado de teste 0",
+    "outcome": "Yes",
+    "side": "BUY",
+    "entry_price": 0.29,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-01T22:26:49.601423+00:00"
+  },
+  "market-1:No:0xAAA0000000000000000000000000000000AAA0-trade-1": {
+    "source_wallet": "0xAAA0000000000000000000000000000000AAA0",
+    "market_id": "market-1",
+    "market_question": "Mercado de teste 1",
+    "outcome": "No",
+    "side": "BUY",
+    "entry_price": 0.57,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-01T22:26:49.601915+00:00"
+  },
+  "market-2:Yes:0xAAA0000000000000000000000000000000AAA0-trade-2": {
+    "source_wallet": "0xAAA0000000000000000000000000000000AAA0",
+    "market_id": "market-2",
+    "market_question": "Mercado de teste 2",
+    "outcome": "Yes",
+    "side": "BUY",
+    "entry_price": 0.6,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-01T22:26:49.602413+00:00"
+  },
+  "market-3:No:0xAAA0000000000000000000000000000000AAA0-trade-3": {
+    "source_wallet": "0xAAA0000000000000000000000000000000AAA0",
+    "market_id": "market-3",
+    "market_question": "Mercado de teste 3",
+    "outcome": "No",
+    "side": "BUY",
+    "entry_price": 0.74,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-01T22:26:49.602859+00:00"
+  },
+  "market-4:Yes:0xAAA0000000000000000000000000000000AAA0-trade-4": {
+    "source_wallet": "0xAAA0000000000000000000000000000000AAA0",
+    "market_id": "market-4",
+    "market_question": "Mercado de teste 4",
+    "outcome": "Yes",
+    "side": "BUY",
+    "entry_price": 0.79,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-01T22:26:49.603342+00:00"
+  }
+}
