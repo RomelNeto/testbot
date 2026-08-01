@@ -1,1 +1,4 @@
 timestamp,action,source_wallet,market_id,market_question,outcome,side,entry_price,size_usd,proceeds_usd,pnl_usd,reason
+2026-08-01T23:06:48.090135+00:00,OPEN,0x2005d16a84ceefa912d4e380cd32e7ff827875ea,0x87eed90ec2bd3a7b7200b700c3d9b9324b4e1a25a05632e69a201abeeb51ea97,ITF Lexington: Kylie Collins vs Anastasia Kulikova,Kylie Collins,BUY,0.49,25.0,,,copiado da carteira qualificada
+2026-08-01T23:06:48.090511+00:00,OPEN,0x2005d16a84ceefa912d4e380cd32e7ff827875ea,0x662356b8dcc1fbdee87914432e4f446704f32e08520d157c73fb154d68686dff,Counter-Strike: NRG vs Voca (BO3) - StarLadder StarSeries North American Qualifier Playoffs,NRG,BUY,0.78,25.0,,,copiado da carteira qualificada
+2026-08-01T23:06:48.090605+00:00,OPEN,0x2005d16a84ceefa912d4e380cd32e7ff827875ea,0x87eed90ec2bd3a7b7200b700c3d9b9324b4e1a25a05632e69a201abeeb51ea97,ITF Lexington: Kylie Collins vs Anastasia Kulikova,Anastasia Kulikova,BUY,0.49,25.0,,,copiado da carteira qualificada
