@@ -2,25 +2,10 @@ name: polymarket-sim-bot
 
 on:
   schedule:
-    # Ciclo de monitoramento: a cada 30 minutos
-    - cron: "*/30 * * * *"
-    # Relatório diário: todos os dias às 08h00 UTC (9h Portugal)
-    - cron: "0 8 * * *"
-    # Descoberta + ranking: toda segunda às 03h00 UTC
-    - cron: "0 3 * * 1"
-  workflow_dispatch:
-    inputs:
-      command:
-        description: "Comando a executar"
-        required: false
-        default: "cycle"
-        type: choice
-        options:
-          - cycle
-          - discover
-          - rank
-          - report
-          - full
+    - cron: "*/30 * * * *"   # ciclo a cada 30 min
+    - cron: "0 3 * * 1"      # redescoberta toda segunda às 3h UTC
+    - cron: "0 8 * * *"      # relatório diário às 9h Portugal
+  workflow_dispatch:          # botão manual no GitHub (qualquer momento)
 
 permissions:
   contents: write
@@ -29,13 +14,13 @@ jobs:
   bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repositório
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configurar Python
+      - name: Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -44,43 +29,49 @@ jobs:
       - name: Instalar dependências
         run: pip install -r requirements.txt
 
-      - name: Determinar comando
-        id: cmd
+      # Se qualified_wallets.json não existe ou está vazio → bootstrap automático
+      - name: Bootstrap automático (primeira vez ou lista vazia)
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "command=${{ github.event.inputs.command }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.schedule }}" = "0 3 * * 1" ]; then
-            echo "command=full" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.schedule }}" = "0 8 * * *" ]; then
-            echo "command=report" >> $GITHUB_OUTPUT
-          else
-            echo "command=cycle" >> $GITHUB_OUTPUT
+          NEEDS_BOOTSTRAP=false
+          if [ ! -f "data/qualified_wallets.json" ]; then
+            echo "qualified_wallets.json não existe → bootstrap"
+            NEEDS_BOOTSTRAP=true
+          elif [ "$(python -c "import json; d=json.load(open('data/qualified_wallets.json')); print(len([x for x in d if x.get('qualifies')]))")" = "0" ]; then
+            echo "Nenhuma carteira qualificada → bootstrap"
+            NEEDS_BOOTSTRAP=true
           fi
 
-      - name: Rodar discover
-        if: steps.cmd.outputs.command == 'discover' || steps.cmd.outputs.command == 'full'
-        run: python main.py discover
+          if [ "$NEEDS_BOOTSTRAP" = "true" ]; then
+            mkdir -p data
+            python main.py discover
+            python main.py rank
+          fi
 
-      - name: Rodar rank
-        if: steps.cmd.outputs.command == 'rank' || steps.cmd.outputs.command == 'full'
-        run: python main.py rank
-
-      - name: Rodar cycle
-        if: steps.cmd.outputs.command == 'cycle' || steps.cmd.outputs.command == 'full'
-        run: python main.py cycle
-
-      - name: Gerar relatório diário
-        if: steps.cmd.outputs.command == 'report' || steps.cmd.outputs.command == 'full'
+      # Relatório diário (só no cron das 8h ou manual)
+      - name: Relatório diário
+        if: github.event.schedule == '0 8 * * *' || github.event_name == 'workflow_dispatch'
         run: python report.py --days 1
 
-      - name: Salvar estado no repositório
+      # Redescoberta semanal (só na segunda às 3h)
+      - name: Redescoberta e ranking semanal
+        if: github.event.schedule == '0 3 * * 1'
+        run: |
+          python main.py discover
+          python main.py rank
+
+      # Cycle — roda SEMPRE (a cada 30min, e também após bootstrap/redescoberta)
+      - name: Monitorar e copiar trades
+        run: python main.py cycle
+
+      # Salvar tudo de volta no repositório
+      - name: Salvar estado
         run: |
           git config user.name  "polymarket-bot[actions]"
           git config user.email "bot@users.noreply.github.com"
           git add data/ reports/ 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "Nenhuma mudança para commitar."
+            echo "Sem mudanças."
           else
-            git commit -m "bot: atualiza estado $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git commit -m "bot: $(date -u '+%Y-%m-%d %H:%M UTC')"
             git push
           fi
