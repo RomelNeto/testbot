@@ -1,19 +1,26 @@
 name: polymarket-sim-bot
 
-# Roda o bot automaticamente na nuvem do GitHub -- seu PC pode ficar
-# desligado. Dois gatilhos:
-#   1. "cycle": a cada 30 minutos, verifica trades novos das carteiras
-#      qualificadas e simula copy trading.
-#   2. "discover" + "rank": uma vez por semana, redescobre carteiras
-#      candidatas e reavalia os filtros de qualidade.
-# O estado (data/*.json, data/trade_log.csv) e commitado de volta no
-# repositorio a cada execucao, entao o bot "lembra" o progresso entre rodadas.
-
 on:
   schedule:
-    - cron: "*/30 * * * *"   # ciclo de monitoramento, a cada 30 min
-    - cron: "0 3 * * 1"      # descoberta + ranking, toda segunda 03:00 UTC
-  workflow_dispatch: {}       # permite rodar manualmente pelo botao "Run workflow"
+    # Ciclo de monitoramento: a cada 30 minutos
+    - cron: "*/30 * * * *"
+    # Relatório diário: todos os dias às 08h00 UTC (9h Portugal)
+    - cron: "0 8 * * *"
+    # Descoberta + ranking: toda segunda às 03h00 UTC
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Comando a executar"
+        required: false
+        default: "cycle"
+        type: choice
+        options:
+          - cycle
+          - discover
+          - rank
+          - report
+          - full
 
 permissions:
   contents: write
@@ -22,35 +29,58 @@ jobs:
   bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do repositorio
+      - name: Checkout repositório
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
-      - name: Instalar dependencias
+      - name: Instalar dependências
         run: pip install -r requirements.txt
 
-      - name: Descoberta + ranking semanal
-        if: github.event.schedule == '0 3 * * 1' || github.event_name == 'workflow_dispatch'
+      - name: Determinar comando
+        id: cmd
         run: |
-          python main.py discover
-          python main.py rank
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "command=${{ github.event.inputs.command }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 3 * * 1" ]; then
+            echo "command=full" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 8 * * *" ]; then
+            echo "command=report" >> $GITHUB_OUTPUT
+          else
+            echo "command=cycle" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Ciclo de monitoramento
-        if: github.event.schedule == '*/30 * * * *' || github.event_name == 'workflow_dispatch'
+      - name: Rodar discover
+        if: steps.cmd.outputs.command == 'discover' || steps.cmd.outputs.command == 'full'
+        run: python main.py discover
+
+      - name: Rodar rank
+        if: steps.cmd.outputs.command == 'rank' || steps.cmd.outputs.command == 'full'
+        run: python main.py rank
+
+      - name: Rodar cycle
+        if: steps.cmd.outputs.command == 'cycle' || steps.cmd.outputs.command == 'full'
         run: python main.py cycle
 
-      - name: Gerar relatorio semanal (as segundas ou manual)
-        if: github.event.schedule == '0 3 * * 1' || github.event_name == 'workflow_dispatch'
-        run: python report.py --days 7
+      - name: Gerar relatório diário
+        if: steps.cmd.outputs.command == 'report' || steps.cmd.outputs.command == 'full'
+        run: python report.py --days 1
 
-      - name: Salvar estado no repositorio
+      - name: Salvar estado no repositório
         run: |
-          git config user.name "polymarket-sim-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add data/ reports/ || true
-          git diff --cached --quiet || git commit -m "bot: atualiza estado da simulacao [skip ci]"
-          git push
+          git config user.name  "polymarket-bot[actions]"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/ reports/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "Nenhuma mudança para commitar."
+          else
+            git commit -m "bot: atualiza estado $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
