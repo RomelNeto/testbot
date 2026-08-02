@@ -98,6 +98,23 @@ def get_positions_for_user(wallet_address: str) -> list[dict]:
     return _get(f"{config.DATA_API_BASE}/positions", params=params)
 
 
+def get_market_by_condition_id(condition_id: str) -> Optional[dict]:
+    """
+    Busca UM mercado especifico direto pelo conditionId, em vez de paginar
+    todos os mercados fechados e procurar manualmente (muito mais rapido e
+    confiavel -- a Gamma API suporta filtrar por condition_ids).
+    Retorna None se nao encontrar (mercado ainda nao resolvido, ou o
+    conditionId nao existe).
+    """
+    params = {"condition_ids": condition_id}
+    result = _get(f"{config.GAMMA_API_BASE}/markets", params=params)
+    if not result:
+        return None
+    if isinstance(result, list):
+        return result[0] if result else None
+    return result
+
+
 def get_recent_trades_feed(limit: int = 500, offset: int = 0,
                             min_cash_amount: Optional[float] = None) -> list[dict]:
     """
