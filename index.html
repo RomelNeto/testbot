@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polymarket Bot — Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+  :root {
+    --bg:#0a0e17; --surface:#111827; --surface2:#1a2235; --border:#1f2d44;
+    --green:#00d97e; --green-dim:#003d22; --red:#ff4d4d; --red-dim:#3d0f0f;
+    --amber:#f59e0b; --amber-dim:#2d1f04; --blue:#3b82f6; --blue-dim:#0d1f3c;
+    --muted:#4b5a70; --text:#e2e8f0; --text2:#8899aa; --mono:'IBM Plex Mono',monospace;
+    --sans:'Inter',sans-serif; --radius:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+  .header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;}
+  .header-left{display:flex;align-items:center;gap:14px;}
+  .logo{width:36px;height:36px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .header h1{font-size:16px;font-weight:600;letter-spacing:-0.02em;}
+  .header-sub{font-size:11px;color:var(--text2);margin-top:2px;font-family:var(--mono);}
+  .badge{font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:20px;display:flex;align-items:center;gap:5px;}
+  .badge-live{background:var(--green-dim);color:var(--green);border:1px solid var(--green);}
+  .badge-loading{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber);}
+  .badge-error{background:var(--red-dim);color:var(--red);border:1px solid var(--red);}
+  .badge::before{content:'';width:6px;height:6px;background:currentColor;border-radius:50%;}
+  .badge-live::before{animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .container{max-width:1200px;margin:0 auto;padding:28px 32px;}
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px;}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+  .kpi-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+  .kpi-value{font-size:24px;font-weight:700;font-family:var(--mono);letter-spacing:-0.02em;}
+  .kpi-sub{font-size:11px;color:var(--text2);margin-top:4px;}
+  .green .kpi-value{color:var(--green);} .red .kpi-value{color:var(--red);} .amber .kpi-value{color:var(--amber);} .blue .kpi-value{color:var(--blue);}
+  .section{margin-bottom:24px;}
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .section-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;}
+  .count-badge{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:2px 8px;border-radius:20px;}
+  .trades-grid{display:flex;flex-direction:column;gap:8px;}
+  .trade-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 16px;display:grid;grid-template-columns:10px 1fr auto;gap:12px;align-items:center;}
+  .trade-card.status-open{border-left:3px solid var(--amber);}
+  .trade-card.status-win{border-left:3px solid var(--green);}
+  .trade-card.status-loss{border-left:3px solid var(--red);}
+  .dot{width:10px;height:10px;border-radius:50%;}
+  .dot-open{background:var(--amber);animation:pulse 2s infinite;}
+  .dot-win{background:var(--green);}
+  .dot-loss{background:var(--red);}
+  .trade-question{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px;}
+  .trade-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .tag{font-size:11px;font-family:var(--mono);padding:2px 6px;border-radius:4px;}
+  .tag-outcome{background:var(--blue-dim);color:var(--blue);}
+  .tag-buy{background:var(--green-dim);color:var(--green);}
+  .tag-sell{background:var(--red-dim);color:var(--red);}
+  .tag-wallet{background:var(--surface2);color:var(--text2);}
+  .tag-nicho{background:var(--surface2);color:var(--text2);}
+  .trade-time{font-size:11px;color:var(--muted);font-family:var(--mono);}
+  .trade-right{text-align:right;flex-shrink:0;}
+  .trade-pnl{font-size:15px;font-weight:700;font-family:var(--mono);}
+  .pnl-open{color:var(--amber);} .pnl-win{color:var(--green);} .pnl-loss{color:var(--red);}
+  .trade-size{font-size:11px;color:var(--text2);margin-top:2px;font-family:var(--mono);}
+  .wallets-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;}
+  .wallet-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+  .wallet-addr{font-family:var(--mono);font-size:12px;color:var(--text2);margin-bottom:10px;}
+  .wallet-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .wallet-stat-val{font-size:18px;font-weight:700;font-family:var(--mono);text-align:center;}
+  .wallet-stat-label{font-size:10px;color:var(--text2);text-transform:uppercase;margin-top:2px;text-align:center;}
+  .wr-bar{height:4px;background:var(--surface2);border-radius:2px;margin-top:12px;overflow:hidden;}
+  .wr-fill{height:100%;background:var(--green);border-radius:2px;}
+  .notice{background:var(--amber-dim);border:1px solid var(--amber);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--amber);margin-bottom:14px;line-height:1.6;}
+  .error-box{background:var(--red-dim);border:1px solid var(--red);border-radius:var(--radius);padding:16px;font-size:13px;color:var(--red);text-align:center;}
+  .loading-box{color:var(--text2);padding:32px;text-align:center;font-family:var(--mono);font-size:12px;}
+  .refresh-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-size:12px;font-family:var(--mono);padding:5px 12px;border-radius:var(--radius);cursor:pointer;}
+  .refresh-btn:hover{border-color:var(--muted);color:var(--text);}
+  .footer{border-top:1px solid var(--border);padding:14px 32px;font-size:11px;color:var(--muted);font-family:var(--mono);display:flex;justify-content:space-between;align-items:center;}
+  .auto-badge{font-size:10px;background:var(--green-dim);color:var(--green);border:1px solid var(--green);padding:2px 7px;border-radius:10px;}
+  @media(max-width:640px){.container{padding:16px;}.header{padding:14px 16px;}.trade-card{grid-template-columns:10px 1fr;}.trade-right{grid-column:2;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">📊</div>
+    <div>
+      <h1>Polymarket Bot — Simulação</h1>
+      <div class="header-sub" id="repo-label">RomelNeto/testbot · DRY RUN · sem dinheiro real</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="refresh-btn" onclick="loadData()">↻ Actualizar</button>
+    <div class="badge badge-loading" id="status-badge">A carregar...</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="kpi-row">
+    <div class="kpi blue"><div class="kpi-label">Capital Inicial</div><div class="kpi-value">$500</div><div class="kpi-sub">fictício</div></div>
+    <div class="kpi" id="kpi-saldo"><div class="kpi-label">Saldo Actual</div><div class="kpi-value">—</div><div class="kpi-sub">a carregar</div></div>
+    <div class="kpi" id="kpi-pnl"><div class="kpi-label">P&L Total</div><div class="kpi-value">—</div><div class="kpi-sub">trades fechados</div></div>
+    <div class="kpi amber"><div class="kpi-label">Em Aberto</div><div class="kpi-value" id="kpi-open-val">—</div><div class="kpi-sub">posições activas</div></div>
+    <div class="kpi" id="kpi-wr"><div class="kpi-label">Win Rate</div><div class="kpi-value">—</div><div class="kpi-sub">—</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Posições</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="auto-badge">actualiza automaticamente</div>
+        <div class="count-badge" id="trade-count">—</div>
+      </div>
+    </div>
+    <div id="open-notice" class="notice" style="display:none">
+      ⚠️ Posições marcadas como <strong>ABERTO</strong> de eventos já terminados fecham automaticamente no próximo ciclo do bot (até 30 minutos).
+    </div>
+    <div class="trades-grid" id="trades-container">
+      <div class="loading-box">A carregar trades do GitHub...</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><div class="section-title">Carteiras monitoradas</div></div>
+    <div class="wallets-grid" id="wallets-container">
+      <div class="loading-box">A carregar carteiras...</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>polymarket-sim-bot · dados reais do repositório</span>
+  <span id="last-update">—</span>
+</div>
+
+<script>
+// ─── CONFIGURAÇÃO ─────────────────────────────────────────────────────────────
+// MUDA AQUI SE MUDARES O NOME DO UTILIZADOR OU REPOSITÓRIO
+const GITHUB_USER = "RomelNeto";
+const GITHUB_REPO = "testbot";
+const BRANCH      = "main";
+const CAPITAL     = 500;
+
+// URLs raw do GitHub — lidas directamente pelo browser
+function rawUrl(path) {
+  return `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/${path}`;
+}
+
+// Cache buster para forçar conteúdo fresco (GitHub tem cache de ~5 min)
+function bustCache(url) {
+  return url + "?t=" + Math.floor(Date.now() / 60000);
+}
+
+// ─── UTILITÁRIOS ──────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.trim().replace(/\r/g,''));
+  return lines.slice(1).map(line => {
+    const vals = line.split(',');
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = (vals[i] || '').trim().replace(/\r/g,''));
+    return obj;
+  });
+}
+
+function fmt(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  const abs = Math.abs(n).toFixed(2);
+  return n >= 0 ? `+$${abs}` : `-$${abs}`;
+}
+
+function fmtDate(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-PT', {day:'2-digit', month:'short'}) + ' ' +
+           d.toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'});
+  } catch { return iso; }
+}
+
+function shortWallet(addr) {
+  if (!addr) return '—';
+  return addr.slice(0,8) + '...' + addr.slice(-6);
+}
+
+function nicho(question) {
+  if (!question) return '📊';
+  const q = question.toLowerCase();
+  if (q.includes('lol') || q.includes('league')) return '🎮 LoL';
+  if (q.includes('counter-strike') || q.includes('cs2') || q.includes('csgo')) return '🎮 CS2';
+  if (q.includes('dota')) return '🎮 Dota';
+  if (q.includes('itf') || q.includes('atp') || q.includes('wta') || q.includes('tennis')) return '🎾 Ténis';
+  if (q.includes('nba') || q.includes('basketball')) return '🏀 NBA';
+  if (q.includes('nfl') || q.includes('football')) return '🏈 NFL';
+  if (q.includes('bitcoin') || q.includes('btc') || q.includes('eth') || q.includes('crypto')) return '₿ Cripto';
+  if (q.includes('trump') || q.includes('election') || q.includes('fed') || q.includes('rate')) return '🏛️ Macro';
+  return '📊 Outro';
+}
+
+// ─── RENDER KPIs ──────────────────────────────────────────────────────────────
+function renderKPIs(rows) {
+  const opens  = rows.filter(r => r.action === 'OPEN');
+  const closes = rows.filter(r => r.action === 'CLOSE');
+
+  let saldo = CAPITAL;
+  opens.forEach(o  => saldo -= parseFloat(o.size_usd) || 0);
+  closes.forEach(c => saldo += parseFloat(c.proceeds_usd) || 0);
+
+  let totalPnl = 0, wins = 0;
+  closes.forEach(c => {
+    const p = parseFloat(c.pnl_usd) || 0;
+    totalPnl += p;
+    if (p > 0) wins++;
+  });
+
+  const openCount = opens.length - closes.length;
+  const wr = closes.length > 0 ? Math.round(wins / closes.length * 100) : null;
+
+  // Saldo
+  const saldoCard = document.getElementById('kpi-saldo');
+  const saldoColor = saldo >= CAPITAL ? 'green' : saldo < CAPITAL * 0.85 ? 'red' : 'amber';
+  saldoCard.className = `kpi ${saldoColor}`;
+  saldoCard.innerHTML = `<div class="kpi-label">Saldo Actual</div>
+    <div class="kpi-value">$${saldo.toFixed(2)}</div>
+    <div class="kpi-sub">${saldo >= CAPITAL ? '▲ acima do inicial' : '▼ abaixo do inicial'}</div>`;
+
+  // PnL
+  const pnlCard = document.getElementById('kpi-pnl');
+  pnlCard.className = `kpi ${totalPnl > 0 ? 'green' : totalPnl < 0 ? 'red' : ''}`;
+  pnlCard.innerHTML = `<div class="kpi-label">P&L Total</div>
+    <div class="kpi-value">${fmt(totalPnl)}</div>
+    <div class="kpi-sub">${closes.length} trades fechados</div>`;
+
+  // Open
+  document.getElementById('kpi-open-val').textContent = Math.max(0, openCount);
+
+  // Win Rate
+  const wrCard = document.getElementById('kpi-wr');
+  wrCard.className = `kpi ${wr === null ? '' : wr >= 55 ? 'green' : wr >= 40 ? 'amber' : 'red'}`;
+  wrCard.innerHTML = `<div class="kpi-label">Win Rate</div>
+    <div class="kpi-value">${wr !== null ? wr + '%' : '—'}</div>
+    <div class="kpi-sub">${wr !== null ? wins + 'W / ' + (closes.length - wins) + 'L' : 'sem fechados'}</div>`;
+}
+
+// ─── RENDER TRADES ────────────────────────────────────────────────────────────
+function renderTrades(rows) {
+  const opens  = rows.filter(r => r.action === 'OPEN');
+  const closes = rows.filter(r => r.action === 'CLOSE');
+
+  // Mapeia opens com os closes correspondentes
+  const positions = opens.map(o => {
+    const c = closes.find(cl =>
+      cl.market_id === o.market_id && cl.outcome === o.outcome
+    );
+    const pnl    = c ? (parseFloat(c.pnl_usd) || 0) : null;
+    const status = c ? (pnl >= 0 ? 'win' : 'loss') : 'open';
+    return { ...o, pnl, status };
+  });
+
+  document.getElementById('trade-count').textContent = `${positions.length} trade${positions.length !== 1 ? 's' : ''}`;
+
+  const hasOldOpen = positions.some(p => p.status === 'open');
+  document.getElementById('open-notice').style.display = hasOldOpen ? 'block' : 'none';
+
+  if (positions.length === 0) {
+    document.getElementById('trades-container').innerHTML =
+      '<div class="loading-box">Sem trades registados. O bot ainda não copiou nenhum trade.</div>';
+    return;
+  }
+
+  // Abertos primeiro, depois por data
+  const sorted = [...positions].sort((a, b) => {
+    if (a.status === 'open' && b.status !== 'open') return -1;
+    if (a.status !== 'open' && b.status === 'open') return  1;
+    return new Date(b.timestamp) - new Date(a.timestamp);
+  });
+
+  document.getElementById('trades-container').innerHTML = sorted.map(p => {
+    let pnlHtml;
+    if (p.status === 'open') {
+      pnlHtml = `<span class="trade-pnl pnl-open">ABERTO</span>`;
+    } else {
+      pnlHtml = `<span class="trade-pnl pnl-${p.status}">${fmt(p.pnl)}</span>`;
+    }
+    return `
+    <div class="trade-card status-${p.status}">
+      <div class="dot dot-${p.status}"></div>
+      <div>
+        <div class="trade-question" title="${p.market_question}">${p.market_question}</div>
+        <div class="trade-meta">
+          <span class="tag tag-outcome">${p.outcome}</span>
+          <span class="tag tag-${p.side.toLowerCase()}">${p.side}</span>
+          <span class="tag tag-wallet">${shortWallet(p.source_wallet)}</span>
+          <span class="tag tag-nicho">${nicho(p.market_question)}</span>
+          <span class="trade-time">${fmtDate(p.timestamp)}</span>
+        </div>
+      </div>
+      <div class="trade-right">
+        ${pnlHtml}
+        <div class="trade-size">$${p.size_usd} @ ${(parseFloat(p.entry_price)*100).toFixed(0)}¢</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── RENDER WALLETS ───────────────────────────────────────────────────────────
+function renderWallets(wallets) {
+  const qualified = wallets.filter(w => w.qualifies);
+  if (qualified.length === 0) {
+    document.getElementById('wallets-container').innerHTML =
+      '<div class="loading-box">Nenhuma carteira qualificada ainda.</div>';
+    return;
+  }
+  document.getElementById('wallets-container').innerHTML = qualified.map(w => `
+    <div class="wallet-card">
+      <div class="wallet-addr">${w.wallet_address.slice(0,16)}...${w.wallet_address.slice(-8)}</div>
+      <div class="wallet-stats">
+        <div><div class="wallet-stat-val" style="color:var(--green)">${Math.round(w.win_rate*100)}%</div><div class="wallet-stat-label">Win Rate</div></div>
+        <div><div class="wallet-stat-val" style="color:var(--green)">${w.wins}</div><div class="wallet-stat-label">Ganhos</div></div>
+        <div><div class="wallet-stat-val" style="color:var(--red)">${w.losses}</div><div class="wallet-stat-label">Perdas</div></div>
+      </div>
+      <div class="wr-bar"><div class="wr-fill" style="width:${w.win_rate*100}%"></div></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text2)">
+        Vol: $${(w.total_volume_usd/1e6).toFixed(1)}M &nbsp;·&nbsp;
+        <span style="color:var(--green)">✓ A ser copiada</span>
+      </div>
+    </div>`).join('');
+}
+
+// ─── CARREGAR DADOS DO GITHUB ─────────────────────────────────────────────────
+async function loadData() {
+  const badge = document.getElementById('status-badge');
+  badge.className = 'badge badge-loading';
+  badge.textContent = 'A carregar...';
+
+  try {
+    // Fetch paralelo: trade_log.csv + qualified_wallets.json
+    const [csvResp, walletsResp] = await Promise.all([
+      fetch(bustCache(rawUrl('data/trade_log.csv'))),
+      fetch(bustCache(rawUrl('data/qualified_wallets.json'))),
+    ]);
+
+    if (!csvResp.ok) throw new Error(`trade_log.csv: ${csvResp.status}`);
+
+    const csvText    = await csvResp.text();
+    const rows       = parseCSV(csvText);
+    const walletsRaw = walletsResp.ok ? await walletsResp.json() : [];
+
+    renderKPIs(rows);
+    renderTrades(rows);
+    renderWallets(walletsRaw);
+
+    const now = new Date().toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('last-update').textContent = `actualizado às ${now}`;
+    badge.className = 'badge badge-live';
+    badge.textContent = 'SIMULAÇÃO ACTIVA';
+
+  } catch (err) {
+    console.error(err);
+    badge.className = 'badge badge-error';
+    badge.textContent = 'Erro ao carregar';
+    document.getElementById('trades-container').innerHTML =
+      `<div class="error-box">
+        Não foi possível carregar os dados do GitHub.<br>
+        <small style="opacity:.7">${err.message}</small><br><br>
+        Verifica se o repositório é público e se os ficheiros existem em <code>data/</code>.
+      </div>`;
+  }
+}
+
+// Carrega ao abrir e depois a cada 5 minutos
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>
