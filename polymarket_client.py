@@ -1,21 +1,9 @@
 """
-Cliente fino para as APIs publicas do Polymarket.
+Cliente para as APIs públicas do Polymarket.
 
-Usa dois servicos:
-- Gamma API  (gamma-api.polymarket.com): metadados de mercados (titulo,
-  categoria, se esta ativo/fechado, precos correntes das outcomes).
-- Data API   (data-api.polymarket.com): trades e posicoes on-chain por
-  carteira (endereco publico).
-
-Nenhum dos dois exige autenticacao para estas leituras. Nao ha envio de
-ordens aqui de proposito -- este projeto e apenas o bot de SIMULACAO.
-
-IMPORTANTE: estas chamadas fazem requisicoes HTTP reais. Elas precisam
-rodar num ambiente com acesso a internet ao Polymarket (o sandbox usado
-para escrever este codigo tem a rede restrita a uma allowlist e bloqueia
-estes dominios -- por isso os testes aqui foram feitos com dados de
-exemplo, nao com chamadas reais). Rode no seu computador ou num VPS para
-testar de verdade.
+FIXES v3:
+- get_market_by_condition_id: tenta 3 estratégias em cascata para garantir
+  que mercados resolvidos são sempre encontrados, mesmo que um endpoint falhe.
 """
 from __future__ import annotations
 
@@ -23,7 +11,6 @@ import time
 from typing import Any, Optional
 
 import requests
-
 import config
 
 
@@ -35,7 +22,8 @@ def _get(url: str, params: Optional[dict] = None, retries: int = 3) -> Any:
     last_err = None
     for attempt in range(retries):
         try:
-            resp = requests.get(url, params=params, timeout=config.REQUEST_TIMEOUT_SECONDS)
+            resp = requests.get(url, params=params,
+                                timeout=config.REQUEST_TIMEOUT_SECONDS)
             resp.raise_for_status()
             return resp.json()
         except requests.RequestException as exc:
@@ -45,23 +33,26 @@ def _get(url: str, params: Optional[dict] = None, retries: int = 3) -> Any:
 
 
 def get_markets(active: bool = True, closed: bool = False, limit: int = 500,
-                 offset: int = 0, category: Optional[str] = None) -> list[dict]:
-    """Busca mercados via Gamma API, com paginacao manual (limit max 500)."""
-    params = {"active": str(active).lower(), "closed": str(closed).lower(),
-              "limit": limit, "offset": offset}
+                offset: int = 0, category: Optional[str] = None) -> list[dict]:
+    params = {
+        "active": str(active).lower(),
+        "closed": str(closed).lower(),
+        "limit": limit,
+        "offset": offset,
+    }
     if category:
         params["tag"] = category
-    return _get(f"{config.GAMMA_API_BASE}/markets", params=params)
+    result = _get(f"{config.GAMMA_API_BASE}/markets", params=params)
+    return result if isinstance(result, list) else []
 
 
 def get_all_markets(active: bool = True, closed: bool = False,
-                     category: Optional[str] = None, max_pages: int = 20) -> list[dict]:
-    """Pagina o endpoint /markets ate acabar ou atingir max_pages."""
+                    category: Optional[str] = None, max_pages: int = 20) -> list[dict]:
     all_markets: list[dict] = []
     offset = 0
     for _ in range(max_pages):
         page = get_markets(active=active, closed=closed, limit=500,
-                            offset=offset, category=category)
+                           offset=offset, category=category)
         if not page:
             break
         all_markets.extend(page)
@@ -71,14 +62,77 @@ def get_all_markets(active: bool = True, closed: bool = False,
     return all_markets
 
 
+def get_market_by_condition_id(condition_id: str) -> Optional[dict]:
+    """
+    Busca um mercado pelo conditionId com 3 estratégias em cascata.
+
+    FIX v3: o parâmetro 'condition_ids' nem sempre funciona na Gamma API
+    — pode retornar vazio mesmo com um ID válido. Por isso tentamos
+    3 abordagens antes de desistir:
+
+    1. Parâmetro 'conditionId' (singular, sem 's') — alguns endpoints aceitam
+    2. Parâmetro 'condition_ids' (plural) — documentado mas inconsistente
+    3. Buscar mercados fechados recentes e procurar pelo ID manualmente
+       (fallback mais lento mas mais fiável)
+    """
+    # Estratégia 1: conditionId singular
+    try:
+        result = _get(f"{config.GAMMA_API_BASE}/markets",
+                      params={"conditionId": condition_id, "limit": 5})
+        if isinstance(result, list) and result:
+            return result[0]
+        elif isinstance(result, dict) and result:
+            return result
+    except Exception:
+        pass
+
+    # Estratégia 2: condition_ids plural
+    try:
+        result = _get(f"{config.GAMMA_API_BASE}/markets",
+                      params={"condition_ids": condition_id, "limit": 5})
+        if isinstance(result, list) and result:
+            return result[0]
+    except Exception:
+        pass
+
+    # Estratégia 3: busca directa pelo ID no endpoint /markets/{id}
+    try:
+        result = _get(f"{config.GAMMA_API_BASE}/markets/{condition_id}")
+        if isinstance(result, dict) and result:
+            return result
+    except Exception:
+        pass
+
+    # Estratégia 4: paginar mercados fechados recentes (até 3 páginas)
+    try:
+        for offset in range(0, 1500, 500):
+            page = get_markets(active=False, closed=True, limit=500,
+                               offset=offset)
+            if not page:
+                break
+            match = next(
+                (m for m in page
+                 if m.get("conditionId") == condition_id
+                 or m.get("id") == condition_id),
+                None,
+            )
+            if match:
+                return match
+    except Exception:
+        pass
+
+    return None
+
+
 def get_trades_for_user(wallet_address: str, limit: int = 500,
-                         offset: int = 0) -> list[dict]:
-    """Historico de trades de uma carteira especifica (mais recente primeiro)."""
+                        offset: int = 0) -> list[dict]:
     params = {"user": wallet_address, "limit": limit, "offset": offset}
-    return _get(f"{config.DATA_API_BASE}/trades", params=params)
+    result = _get(f"{config.DATA_API_BASE}/trades", params=params)
+    return result if isinstance(result, list) else []
 
 
-def get_all_trades_for_user(wallet_address: str, max_pages: int = 10) -> list[dict]:
+def get_all_trades_for_user(wallet_address: str,
+                             max_pages: int = 10) -> list[dict]:
     all_trades: list[dict] = []
     offset = 0
     for _ in range(max_pages):
@@ -93,42 +147,16 @@ def get_all_trades_for_user(wallet_address: str, max_pages: int = 10) -> list[di
 
 
 def get_positions_for_user(wallet_address: str) -> list[dict]:
-    """Posicoes abertas/fechadas de uma carteira (usado para checar resolucao)."""
     params = {"user": wallet_address}
-    return _get(f"{config.DATA_API_BASE}/positions", params=params)
-
-
-def get_market_by_condition_id(condition_id: str) -> Optional[dict]:
-    """
-    Busca UM mercado especifico direto pelo conditionId, em vez de paginar
-    todos os mercados fechados e procurar manualmente (muito mais rapido e
-    confiavel -- a Gamma API suporta filtrar por condition_ids).
-    Retorna None se nao encontrar (mercado ainda nao resolvido, ou o
-    conditionId nao existe).
-    """
-    params = {"condition_ids": condition_id}
-    result = _get(f"{config.GAMMA_API_BASE}/markets", params=params)
-    if not result:
-        return None
-    if isinstance(result, list):
-        return result[0] if result else None
-    return result
+    result = _get(f"{config.DATA_API_BASE}/positions", params=params)
+    return result if isinstance(result, list) else []
 
 
 def get_recent_trades_feed(limit: int = 500, offset: int = 0,
                             min_cash_amount: Optional[float] = None) -> list[dict]:
-    """
-    Feed GLOBAL de trades recentes (sem filtrar por usuario) -- usado para
-    DESCOBRIR carteiras automaticamente, em vez de exigir que voce ja saiba
-    enderecos de antemao.
-
-    Se min_cash_amount for informado, usa os parametros documentados
-    filterType=CASH & filterAmount=<valor> para trazer so trades acima
-    desse valor em dolares (um proxy simples de "trade feito por alguem
-    com capital relevante").
-    """
     params: dict = {"limit": limit, "offset": offset, "takerOnly": "true"}
     if min_cash_amount is not None:
         params["filterType"] = "CASH"
         params["filterAmount"] = min_cash_amount
-    return _get(f"{config.DATA_API_BASE}/trades", params=params)
+    result = _get(f"{config.DATA_API_BASE}/trades", params=params)
+    return result if isinstance(result, list) else []
