@@ -1,9 +1,17 @@
 """
 Motor de simulacao (copy trading em modo dry-run).
 
-FIXES v2:
-- Impede copiar os dois lados do mesmo mercado (bug dos dois outcomes)
-- Fecho de posicoes agora usa a Gamma API por market_id directo (mais fiavel)
+Responsabilidades:
+- Manter o saldo fictício e as posicoes abertas.
+- Quando uma carteira qualificada abre um trade novo, decidir se copia
+  (respeitando limites de exposicao e o corte de perdas consecutivas).
+- Registrar cada acao no log de trades (CSV), que depois alimenta o
+  relatorio semanal.
+
+Nada aqui envia ordens reais -- e apenas contabilidade em arquivo local.
+Isso e o que muda quando (e se) voce migrar para dinheiro real: a funcao
+`_record_fill()` abaixo e o unico lugar que, no modo real, chamaria a API
+de execucao em vez de so escrever no CSV.
 """
 from __future__ import annotations
 
@@ -42,6 +50,8 @@ class SimulationState:
         self.consecutive_losses: dict = _load_json(
             os.path.join(config.DATA_DIR, "consecutive_losses.json"), {}
         )
+        # Saldo fictício = capital inicial - valor travado em posicoes abertas.
+        # Recalculado a partir do log de trades para evitar drift.
         self.cash_balance = self._recompute_cash_balance()
 
     def _recompute_cash_balance(self) -> float:
@@ -66,14 +76,6 @@ class SimulationState:
     def is_wallet_paused(self, wallet_address: str) -> bool:
         return self.consecutive_losses.get(wallet_address, 0) >= config.MAX_CONSECUTIVE_LOSSES_PER_WALLET
 
-    def already_has_position_for_market(self, market_id: str) -> bool:
-        """FIX: impede abrir posicao em mercado onde ja existe uma posicao aberta
-        (qualquer outcome) — evita o bug de apostar nos dois lados."""
-        for pos in self.open_positions.values():
-            if pos.get("market_id") == market_id:
-                return True
-        return False
-
 
 def _append_trade_log(row: dict) -> None:
     os.makedirs(config.DATA_DIR, exist_ok=True)
@@ -92,36 +94,30 @@ def _append_trade_log(row: dict) -> None:
 
 def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: dict) -> bool:
     """
-    Avalia um trade novo e decide se copia. Retorna True se copiou.
+    Avalia um trade novo detectado numa carteira qualificada e decide se o
+    bot deve "copiar" (simular) essa entrada. Retorna True se copiou.
     """
     trade_id = source_trade.get("id") or source_trade.get("transactionHash")
     if trade_id and trade_id in state.seen_trade_ids:
-        return False
+        return False  # ja processado
 
     if state.is_wallet_paused(source_wallet):
-        return False
+        return False  # carteira suspensa por sequencia de perdas
 
     if len(state.open_positions) >= config.MAX_OPEN_POSITIONS:
-        return False
+        return False  # limite de exposicao simultanea atingido
 
     market_id = source_trade.get("conditionId") or source_trade.get("market")
     outcome = source_trade.get("outcome")
+    outcome_index = source_trade.get("outcomeIndex")
     side = source_trade.get("side", "BUY")
     entry_price = float(source_trade.get("price", 0) or 0)
-
     if entry_price <= 0 or entry_price >= 1:
-        return False
-
-    # FIX: nao abrir segundo lado do mesmo mercado
-    if market_id and state.already_has_position_for_market(market_id):
-        print(f"  [skip] mercado {market_id[:16]}... ja tem posicao aberta — ignorando segundo lado")
-        if trade_id:
-            state.seen_trade_ids.append(trade_id)
-        return False
+        return False  # preco invalido para um mercado binario (0-1)
 
     size_usd = round(config.SIMULATED_CAPITAL_USD * config.POSITION_SIZE_PCT, 2)
     if size_usd > state.cash_balance:
-        return False
+        return False  # sem saldo fictício suficiente
 
     position_key = f"{market_id}:{outcome}:{trade_id}"
     state.open_positions[position_key] = {
@@ -129,6 +125,7 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
         "market_id": market_id,
         "market_question": source_trade.get("title") or source_trade.get("question", ""),
         "outcome": outcome,
+        "outcome_index": outcome_index,
         "side": side,
         "entry_price": entry_price,
         "size_usd": size_usd,
@@ -155,7 +152,11 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
 
 def close_position(state: SimulationState, position_key: str, resolution_price: float,
                     reason: str = "mercado resolvido") -> None:
-    """Fecha uma posicao simulada com o preco de resolucao."""
+    """
+    Fecha uma posicao simulada quando o mercado copiado resolve
+    (resolution_price = 1.0 se o outcome apostado venceu, 0.0 se perdeu;
+    valores intermediarios cobrem fechamento antecipado por preco de mercado).
+    """
     pos = state.open_positions.pop(position_key, None)
     if pos is None:
         return
