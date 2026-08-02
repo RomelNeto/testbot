@@ -2,35 +2,35 @@
   {
     "wallet_address": "0xe16d3f2a5807999b358affd9445c3a09e45e5e30",
     "total_trades": 5000,
-    "resolved_trades": 96,
+    "resolved_trades": 97,
     "wins": 0,
     "losses": 0,
     "win_rate": 0.0,
-    "total_volume_usd": 8321184.81,
+    "total_volume_usd": 8335473.43,
     "qualifies": false,
-    "reason": "win rate 0% abaixo do minimo 55%"
+    "reason": "sem trades resolvidos com PnL claro para validar performance"
   },
   {
     "wallet_address": "0x04b1e3aff4fed7a6868757761db7486ddb6cd224",
-    "total_trades": 4572,
+    "total_trades": 4592,
     "resolved_trades": 0,
     "wins": 0,
     "losses": 0,
     "win_rate": 0.0,
-    "total_volume_usd": 7832894.66,
+    "total_volume_usd": 7926583.93,
     "qualifies": false,
-    "reason": "sem trades resolvidos suficientes para validar performance"
+    "reason": "sem trades resolvidos com PnL claro para validar performance"
   },
   {
-    "wallet_address": "0xf070207d315d47fd07870e464d3ded9151f5ac55",
-    "total_trades": 2486,
-    "resolved_trades": 90,
+    "wallet_address": "0xd487f513cfead22d76b6db4567c756b3cf25053e",
+    "total_trades": 5000,
+    "resolved_trades": 3,
     "wins": 0,
-    "losses": 0,
+    "losses": 3,
     "win_rate": 0.0,
-    "total_volume_usd": 16585713.33,
+    "total_volume_usd": 15642285.21,
     "qualifies": false,
-    "reason": "win rate 0% abaixo do minimo 55%"
+    "reason": "win rate 0% abaixo do minimo 55% (0W/3L, 0 neutros ignorados)"
   },
   {
     "wallet_address": "0x4b1db2741699fee93d2fd63eec0a6778a39f76a0",
@@ -38,10 +38,32 @@
     "resolved_trades": 12,
     "wins": 2,
     "losses": 2,
-    "win_rate": 0.16666666666666666,
+    "win_rate": 0.5,
     "total_volume_usd": 956343.31,
     "qualifies": false,
-    "reason": "win rate 17% abaixo do minimo 55%"
+    "reason": "win rate 50% abaixo do minimo 55% (2W/2L, 8 neutros ignorados)"
+  },
+  {
+    "wallet_address": "0xf070207d315d47fd07870e464d3ded9151f5ac55",
+    "total_trades": 2493,
+    "resolved_trades": 87,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_volume_usd": 16623230.77,
+    "qualifies": false,
+    "reason": "sem trades resolvidos com PnL claro para validar performance"
+  },
+  {
+    "wallet_address": "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3",
+    "total_trades": 5000,
+    "resolved_trades": 95,
+    "wins": 38,
+    "losses": 6,
+    "win_rate": 0.8636363636363636,
+    "total_volume_usd": 20783928.45,
+    "qualifies": true,
+    "reason": "OK"
   },
   {
     "wallet_address": "0xc1c7bb8761105f6d33fc8d71dec31b5688a0f0a7",
@@ -52,29 +74,7 @@
     "win_rate": 0.0,
     "total_volume_usd": 2764253.85,
     "qualifies": false,
-    "reason": "win rate 0% abaixo do minimo 55%"
-  },
-  {
-    "wallet_address": "0xe1000ddb5f5025849765e29d051dfff78f5d4d41",
-    "total_trades": 527,
-    "resolved_trades": 31,
-    "wins": 6,
-    "losses": 2,
-    "win_rate": 0.1935483870967742,
-    "total_volume_usd": 1333179.3,
-    "qualifies": false,
-    "reason": "win rate 19% abaixo do minimo 55%"
-  },
-  {
-    "wallet_address": "0x3ebd6441c0b5ee308208bf30b2819a59b763b66a",
-    "total_trades": 763,
-    "resolved_trades": 0,
-    "wins": 0,
-    "losses": 0,
-    "win_rate": 0.0,
-    "total_volume_usd": 1820223.47,
-    "qualifies": false,
-    "reason": "sem trades resolvidos suficientes para validar performance"
+    "reason": "sem trades resolvidos com PnL claro para validar performance"
   },
   {
     "wallet_address": "0x9e3ed7b661a903fc97afcf49e0f014ebe869f882",
@@ -82,32 +82,43 @@
     "resolved_trades": 12,
     "wins": 2,
     "losses": 8,
-    "win_rate": 0.16666666666666666,
-    "total_volume_usd": 447431.11,
+    "win_rate": 0.2,
+    "total_volume_usd": 463592.2,
     "qualifies": false,
-    "reason": "win rate 17% abaixo do minimo 55%"
+    "reason": "win rate 20% abaixo do minimo 55% (2W/8L, 2 neutros ignorados)"
   },
   {
-    "wallet_address": "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3",
+    "wallet_address": "0x0063b23cdeb43166d6c0246c05baaf9b9bd72dd2",
     "total_trades": 5000,
-    "resolved_trades": 95,
-    "wins": 38,
-    "losses": 6,
-    "win_rate": 0.4,
-    "total_volume_usd": 20739834.0,
+    "resolved_trades": 12,
+    "wins": 4,
+    "losses": 8,
+    "win_rate": 0.3333333333333333,
+    "total_volume_usd": 1713884.46,
     "qualifies": false,
-    "reason": "win rate 40% abaixo do minimo 55%"
+    "reason": "win rate 33% abaixo do minimo 55% (4W/8L, 0 neutros ignorados)"
+  },
+  {
+    "wallet_address": "0x3ebd6441c0b5ee308208bf30b2819a59b763b66a",
+    "total_trades": 767,
+    "resolved_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_volume_usd": 1832258.17,
+    "qualifies": false,
+    "reason": "sem trades resolvidos com PnL claro para validar performance"
   },
   {
     "wallet_address": "0xd9670ea74384c1e1b9dc1e4267ffadaf4cdd1409",
     "total_trades": 346,
-    "resolved_trades": 1,
+    "resolved_trades": 0,
     "wins": 0,
-    "losses": 1,
+    "losses": 0,
     "win_rate": 0.0,
     "total_volume_usd": 1828169.48,
     "qualifies": false,
-    "reason": "win rate 0% abaixo do minimo 55%"
+    "reason": "sem trades resolvidos com PnL claro para validar performance"
   },
   {
     "wallet_address": "0x5bcb106c28aa88ce49c4674e62153ab52daf398a",
@@ -118,7 +129,62 @@
     "win_rate": 0.0,
     "total_volume_usd": 318397.47,
     "qualifies": false,
-    "reason": "apenas 62 trades (minimo 100); win rate 0% abaixo do minimo 55%"
+    "reason": "apenas 62 trades (minimo 100); sem trades resolvidos com PnL claro para validar performance"
+  },
+  {
+    "wallet_address": "0xf148f9acb3d2b140792640b92dffea6bb2550b4f",
+    "total_trades": 3200,
+    "resolved_trades": 96,
+    "wins": 2,
+    "losses": 8,
+    "win_rate": 0.2,
+    "total_volume_usd": 2268571.58,
+    "qualifies": false,
+    "reason": "win rate 20% abaixo do minimo 55% (2W/8L, 86 neutros ignorados)"
+  },
+  {
+    "wallet_address": "0xcdc16095643e158c407da40f9a9a8da24f80bdd8",
+    "total_trades": 316,
+    "resolved_trades": 71,
+    "wins": 1,
+    "losses": 2,
+    "win_rate": 0.3333333333333333,
+    "total_volume_usd": 1829432.55,
+    "qualifies": false,
+    "reason": "win rate 33% abaixo do minimo 55% (1W/2L, 68 neutros ignorados)"
+  },
+  {
+    "wallet_address": "0xa05ec37f1039fab381d8f353354d00cd8c594394",
+    "total_trades": 1006,
+    "resolved_trades": 56,
+    "wins": 8,
+    "losses": 11,
+    "win_rate": 0.42105263157894735,
+    "total_volume_usd": 1637721.53,
+    "qualifies": false,
+    "reason": "win rate 42% abaixo do minimo 55% (8W/11L, 37 neutros ignorados)"
+  },
+  {
+    "wallet_address": "0xeb490d0534bb68b4c2ce139b219a728cd2c3693e",
+    "total_trades": 1830,
+    "resolved_trades": 30,
+    "wins": 0,
+    "losses": 3,
+    "win_rate": 0.0,
+    "total_volume_usd": 2421874.97,
+    "qualifies": false,
+    "reason": "win rate 0% abaixo do minimo 55% (0W/3L, 27 neutros ignorados)"
+  },
+  {
+    "wallet_address": "0x0a39b3b29ab3b7dd753aa96fde4ecab3f2dbb0b9",
+    "total_trades": 111,
+    "resolved_trades": 14,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "total_volume_usd": 367080.13,
+    "qualifies": false,
+    "reason": "sem trades resolvidos com PnL claro para validar performance"
   },
   {
     "wallet_address": "0xe9076a87c5ed90ef16e6fe6529c943baeca0cff6",
@@ -127,97 +193,20 @@
     "wins": 0,
     "losses": 0,
     "win_rate": 0.0,
-    "total_volume_usd": 385205.72,
+    "total_volume_usd": 398465.03,
     "qualifies": false,
-    "reason": "sem trades resolvidos suficientes para validar performance"
+    "reason": "sem trades resolvidos com PnL claro para validar performance"
   },
   {
-    "wallet_address": "0xf148f9acb3d2b140792640b92dffea6bb2550b4f",
-    "total_trades": 3184,
-    "resolved_trades": 96,
-    "wins": 2,
-    "losses": 8,
-    "win_rate": 0.020833333333333332,
-    "total_volume_usd": 2243965.38,
-    "qualifies": false,
-    "reason": "win rate 2% abaixo do minimo 55%"
-  },
-  {
-    "wallet_address": "0x0063b23cdeb43166d6c0246c05baaf9b9bd72dd2",
+    "wallet_address": "0x2a69660046d7acc4ab204d7cc5ba78b0776cd2f7",
     "total_trades": 5000,
-    "resolved_trades": 12,
-    "wins": 4,
-    "losses": 8,
-    "win_rate": 0.3333333333333333,
-    "total_volume_usd": 1691743.08,
-    "qualifies": false,
-    "reason": "win rate 33% abaixo do minimo 55%"
-  },
-  {
-    "wallet_address": "0x3dfb153c197d4c19d3b31c1ecd2c7b6860eeabaf",
-    "total_trades": 4540,
-    "resolved_trades": 39,
+    "resolved_trades": 100,
     "wins": 0,
     "losses": 0,
     "win_rate": 0.0,
-    "total_volume_usd": 54969543.2,
+    "total_volume_usd": 571178.11,
     "qualifies": false,
-    "reason": "win rate 0% abaixo do minimo 55%"
-  },
-  {
-    "wallet_address": "0xc69bd5567b40ef4d11922eaa57e1f9be1c642076",
-    "total_trades": 5000,
-    "resolved_trades": 0,
-    "wins": 0,
-    "losses": 0,
-    "win_rate": 0.0,
-    "total_volume_usd": 45375.87,
-    "qualifies": false,
-    "reason": "sem trades resolvidos suficientes para validar performance"
-  },
-  {
-    "wallet_address": "0x0a39b3b29ab3b7dd753aa96fde4ecab3f2dbb0b9",
-    "total_trades": 108,
-    "resolved_trades": 14,
-    "wins": 0,
-    "losses": 0,
-    "win_rate": 0.0,
-    "total_volume_usd": 360227.04,
-    "qualifies": false,
-    "reason": "win rate 0% abaixo do minimo 55%"
-  },
-  {
-    "wallet_address": "0xcae693bcf9696a2ebf0a62de767719b45f354f85",
-    "total_trades": 5000,
-    "resolved_trades": 22,
-    "wins": 10,
-    "losses": 9,
-    "win_rate": 0.45454545454545453,
-    "total_volume_usd": 4696466.73,
-    "qualifies": false,
-    "reason": "win rate 45% abaixo do minimo 55%"
-  },
-  {
-    "wallet_address": "0xa05ec37f1039fab381d8f353354d00cd8c594394",
-    "total_trades": 1002,
-    "resolved_trades": 56,
-    "wins": 8,
-    "losses": 11,
-    "win_rate": 0.14285714285714285,
-    "total_volume_usd": 1612015.2,
-    "qualifies": false,
-    "reason": "win rate 14% abaixo do minimo 55%"
-  },
-  {
-    "wallet_address": "0x86279a7e9e5c178aae89b7cc13b287f741ed5382",
-    "total_trades": 999,
-    "resolved_trades": 95,
-    "wins": 0,
-    "losses": 2,
-    "win_rate": 0.0,
-    "total_volume_usd": 2603638.21,
-    "qualifies": false,
-    "reason": "win rate 0% abaixo do minimo 55%"
+    "reason": "sem trades resolvidos com PnL claro para validar performance"
   },
   {
     "wallet_address": "0x5fffd0453bc849f81997e63f389e4956e458265c",
@@ -228,50 +217,61 @@
     "win_rate": 0.0,
     "total_volume_usd": 325227.44,
     "qualifies": false,
-    "reason": "apenas 78 trades (minimo 100); win rate 0% abaixo do minimo 55%"
+    "reason": "apenas 78 trades (minimo 100); sem trades resolvidos com PnL claro para validar performance"
   },
   {
-    "wallet_address": "0x2a69660046d7acc4ab204d7cc5ba78b0776cd2f7",
+    "wallet_address": "0xe3d4dee2427b98042822543f8e1e8ab7bafb2bac",
     "total_trades": 5000,
+    "resolved_trades": 82,
+    "wins": 3,
+    "losses": 10,
+    "win_rate": 0.23076923076923078,
+    "total_volume_usd": 7362104.28,
+    "qualifies": false,
+    "reason": "win rate 23% abaixo do minimo 55% (3W/10L, 69 neutros ignorados)"
+  },
+  {
+    "wallet_address": "0x5f659bccbc353dbf7bcdffdee73bee60bb482036",
+    "total_trades": 2658,
     "resolved_trades": 100,
+    "wins": 2,
+    "losses": 1,
+    "win_rate": 0.6666666666666666,
+    "total_volume_usd": 30392036.71,
+    "qualifies": true,
+    "reason": "OK"
+  },
+  {
+    "wallet_address": "0x86279a7e9e5c178aae89b7cc13b287f741ed5382",
+    "total_trades": 1000,
+    "resolved_trades": 94,
+    "wins": 0,
+    "losses": 2,
+    "win_rate": 0.0,
+    "total_volume_usd": 2618623.21,
+    "qualifies": false,
+    "reason": "win rate 0% abaixo do minimo 55% (0W/2L, 92 neutros ignorados)"
+  },
+  {
+    "wallet_address": "0x38337de21ff0bb0a11a40761507d51e318d633d1",
+    "total_trades": 1688,
+    "resolved_trades": 95,
     "wins": 0,
     "losses": 0,
     "win_rate": 0.0,
-    "total_volume_usd": 587357.76,
+    "total_volume_usd": 8769513.81,
     "qualifies": false,
-    "reason": "win rate 0% abaixo do minimo 55%"
+    "reason": "sem trades resolvidos com PnL claro para validar performance"
   },
   {
-    "wallet_address": "0xd487f513cfead22d76b6db4567c756b3cf25053e",
+    "wallet_address": "0xcae693bcf9696a2ebf0a62de767719b45f354f85",
     "total_trades": 5000,
-    "resolved_trades": 3,
-    "wins": 0,
-    "losses": 3,
-    "win_rate": 0.0,
-    "total_volume_usd": 15530075.21,
+    "resolved_trades": 22,
+    "wins": 10,
+    "losses": 9,
+    "win_rate": 0.5263157894736842,
+    "total_volume_usd": 4698643.02,
     "qualifies": false,
-    "reason": "win rate 0% abaixo do minimo 55%"
-  },
-  {
-    "wallet_address": "0xa4697a5b38a3da3d7bb70f13eedfa5611bf10782",
-    "total_trades": 2371,
-    "resolved_trades": 96,
-    "wins": 4,
-    "losses": 6,
-    "win_rate": 0.041666666666666664,
-    "total_volume_usd": 2811892.63,
-    "qualifies": false,
-    "reason": "win rate 4% abaixo do minimo 55%"
-  },
-  {
-    "wallet_address": "0xcdc16095643e158c407da40f9a9a8da24f80bdd8",
-    "total_trades": 311,
-    "resolved_trades": 71,
-    "wins": 1,
-    "losses": 2,
-    "win_rate": 0.014084507042253521,
-    "total_volume_usd": 1795514.42,
-    "qualifies": false,
-    "reason": "win rate 1% abaixo do minimo 55%"
+    "reason": "win rate 53% abaixo do minimo 55% (10W/9L, 3 neutros ignorados)"
   }
 ]

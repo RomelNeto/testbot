@@ -1,1 +1,82 @@
-{}
+{
+  "0x285c287b25c52143b64c35c55ede16df3b63778714e2e5436c9ed33c3056965e:JD Gaming:0x511a5bdc95d5c3cc37fd07c5c726bf8792da99488488fd5f65aef1b653540d83": {
+    "source_wallet": "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3",
+    "market_id": "0x285c287b25c52143b64c35c55ede16df3b63778714e2e5436c9ed33c3056965e",
+    "market_question": "LoL: Top Esports vs JD Gaming - Game 1 Winner",
+    "outcome": "JD Gaming",
+    "side": "BUY",
+    "entry_price": 0.07,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-02T12:33:52.777523+00:00"
+  },
+  "0xe246c845e96d5d979c541eae7d0caf0a400c9c16444e0337f652ff1a5d99b6ea:HANJIN BRION:0x258fa2d2f194c0f4545f168717c0db73a439f0810d897f3f5f8c621c82deb61c": {
+    "source_wallet": "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3",
+    "market_id": "0xe246c845e96d5d979c541eae7d0caf0a400c9c16444e0337f652ff1a5d99b6ea",
+    "market_question": "LoL: DN SOOPers vs HANJIN BRION - Game 2 Winner",
+    "outcome": "HANJIN BRION",
+    "side": "SELL",
+    "entry_price": 0.999,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-02T12:33:52.777861+00:00"
+  },
+  "0x61a208f9c0cb98730b2f322317ddfdcba276feb5d2b1a2482eac948525ef8538:Hanwha Life Esports:0x7d3ba1e77a095b0441fb718f6ddabae9cd55c742809d424f5b88de5a8a4ddfb8": {
+    "source_wallet": "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3",
+    "market_id": "0x61a208f9c0cb98730b2f322317ddfdcba276feb5d2b1a2482eac948525ef8538",
+    "market_question": "LoL: KT Rolster vs Hanwha Life Esports - Game 1 Winner",
+    "outcome": "Hanwha Life Esports",
+    "side": "BUY",
+    "entry_price": 0.19,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-02T12:33:52.777949+00:00"
+  },
+  "0x2cdaba050415445b21a1631021d8c2d3c7b1ccf72f81536bd1c963a2e5450db9:Invictus Gaming:0xc64116b5a3b62fa97ed9dd7252e8e22e61c6dab9bbe53ccc890a10f80349768d": {
+    "source_wallet": "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3",
+    "market_id": "0x2cdaba050415445b21a1631021d8c2d3c7b1ccf72f81536bd1c963a2e5450db9",
+    "market_question": "LoL: LNG Esports vs Invictus Gaming - Game 2 Winner",
+    "outcome": "Invictus Gaming",
+    "side": "BUY",
+    "entry_price": 0.999,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-02T12:33:52.778035+00:00"
+  },
+  "0xe027493beba147b29b0e990dcf60d9af4760dd41ab24d62ed321bee0cd92dc16:Invictus Gaming:0x5d14b86b8265351c972481c5a3fb65868b86af95b82ad6f2a1af56e0655cc950": {
+    "source_wallet": "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3",
+    "market_id": "0xe027493beba147b29b0e990dcf60d9af4760dd41ab24d62ed321bee0cd92dc16",
+    "market_question": "LoL: LNG Esports vs Invictus Gaming - Game 1 Winner",
+    "outcome": "Invictus Gaming",
+    "side": "BUY",
+    "entry_price": 0.9899930039,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-02T12:33:52.778114+00:00"
+  },
+  "0x41fcdf0dde37fdfd08dc7d020cc79bd9567d5473479bb65725ad3c10663fef4d:DN SOOPers:0x0385c767d98d932ff5338076ad4d071fd1861f638b5e363d30a2422d67b56889": {
+    "source_wallet": "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3",
+    "market_id": "0x41fcdf0dde37fdfd08dc7d020cc79bd9567d5473479bb65725ad3c10663fef4d",
+    "market_question": "LoL: DN SOOPers vs HANJIN BRION (BO3) - LCK Round 3-4 Rise Group",
+    "outcome": "DN SOOPers",
+    "side": "BUY",
+    "entry_price": 0.9989996878,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-02T12:33:52.778183+00:00"
+  },
+  "0x35a17105ab9cadc57e0de8d1accacd88dfc6e4db5cb73889304d9d4e3437bac7:Team WE:0x788e05c656f35991b4a1ec808e919df67d25e07b2aa886559a96772e768727b9": {
+    "source_wallet": "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3",
+    "market_id": "0x35a17105ab9cadc57e0de8d1accacd88dfc6e4db5cb73889304d9d4e3437bac7",
+    "market_question": "LoL: ThunderTalk Gaming vs Team WE (BO3) - LPL Group Ascend",
+    "outcome": "Team WE",
+    "side": "BUY",
+    "entry_price": 0.7,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-02T12:33:52.778261+00:00"
+  },
+  "0xe2f60d2d25dac9efd80b183238f46717c1519213229dfef09e0b0a8dbd53cb77:HANJIN BRION:0xd878233ed54140ec164795f3aa527d22f1bcdf4b75441b7fa460e3ac707168cb": {
+    "source_wallet": "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3",
+    "market_id": "0xe2f60d2d25dac9efd80b183238f46717c1519213229dfef09e0b0a8dbd53cb77",
+    "market_question": "LoL: DN SOOPers vs HANJIN BRION - Game 1 Winner",
+    "outcome": "HANJIN BRION",
+    "side": "BUY",
+    "entry_price": 0.03,
+    "size_usd": 25.0,
+    "opened_at": "2026-08-02T12:33:52.778348+00:00"
+  }
+}

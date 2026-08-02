@@ -1,5 +1,5 @@
 # Relatório do bot — Polymarket Simulação
-**Período:** hoje (2026-08-02) · gerado às 11:50 UTC
+**Período:** hoje (2026-08-02) · gerado às 12:33 UTC
 
 ## 💰 Resumo financeiro
 | Métrica | Valor |
