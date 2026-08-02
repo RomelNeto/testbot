@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polymarket Bot — Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg:        #0a0e17;
+    --surface:   #111827;
+    --surface2:  #1a2235;
+    --border:    #1f2d44;
+    --green:     #00d97e;
+    --green-dim: #003d22;
+    --red:       #ff4d4d;
+    --red-dim:   #3d0f0f;
+    --amber:     #f59e0b;
+    --amber-dim: #2d1f04;
+    --blue:      #3b82f6;
+    --blue-dim:  #0d1f3c;
+    --muted:     #4b5a70;
+    --text:      #e2e8f0;
+    --text2:     #8899aa;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'Inter', sans-serif;
+    --radius:    8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; min-height: 100vh; }
+
+  /* Header */
+  .header { border-bottom: 1px solid var(--border); padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo { width: 36px; height: 36px; background: var(--green); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .header h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+  .header-sub { font-size: 12px; color: var(--text2); margin-top: 2px; font-family: var(--mono); }
+  .badge-live { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); font-size: 11px; font-family: var(--mono); padding: 3px 10px; border-radius: 20px; display: flex; align-items: center; gap: 5px; }
+  .badge-live::before { content: ''; width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Layout */
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+  /* KPI Row */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; }
+  .kpi-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .kpi-value { font-size: 26px; font-weight: 700; font-family: var(--mono); letter-spacing: -0.02em; }
+  .kpi-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+  .kpi.green .kpi-value { color: var(--green); }
+  .kpi.red   .kpi-value { color: var(--red); }
+  .kpi.amber .kpi-value { color: var(--amber); }
+  .kpi.blue  .kpi-value { color: var(--blue); }
+
+  /* Section */
+  .section { margin-bottom: 28px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+  .count-badge { font-family: var(--mono); font-size: 11px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); padding: 2px 8px; border-radius: 20px; }
+
+  /* Trade cards */
+  .trades-grid { display: flex; flex-direction: column; gap: 8px; }
+  .trade-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; transition: border-color 0.15s; }
+  .trade-card:hover { border-color: var(--muted); }
+  .trade-card.status-open { border-left: 3px solid var(--amber); }
+  .trade-card.status-win  { border-left: 3px solid var(--green); }
+  .trade-card.status-loss { border-left: 3px solid var(--red); }
+
+  .trade-status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .dot-open { background: var(--amber); animation: pulse 2s infinite; }
+  .dot-win  { background: var(--green); }
+  .dot-loss { background: var(--red); }
+
+  .trade-main { min-width: 0; }
+  .trade-question { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; }
+  .trade-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .trade-tag { font-size: 11px; font-family: var(--mono); padding: 2px 7px; border-radius: 4px; }
+  .tag-outcome { background: var(--blue-dim); color: var(--blue); }
+  .tag-buy  { background: var(--green-dim); color: var(--green); }
+  .tag-sell { background: var(--red-dim); color: var(--red); }
+  .tag-wallet { background: var(--surface2); color: var(--text2); }
+  .trade-time { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+  .trade-right { text-align: right; flex-shrink: 0; }
+  .trade-pnl { font-size: 16px; font-weight: 700; font-family: var(--mono); }
+  .pnl-open { color: var(--amber); }
+  .pnl-win  { color: var(--green); }
+  .pnl-loss { color: var(--red); }
+  .trade-size { font-size: 11px; color: var(--text2); margin-top: 2px; font-family: var(--mono); }
+
+  /* Wallet cards */
+  .wallets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  .wallet-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; }
+  .wallet-addr { font-family: var(--mono); font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+  .wallet-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .wallet-stat { text-align: center; }
+  .wallet-stat-val { font-size: 18px; font-weight: 700; font-family: var(--mono); }
+  .wallet-stat-label { font-size: 10px; color: var(--text2); text-transform: uppercase; margin-top: 2px; }
+  .wr-bar { height: 4px; background: var(--surface2); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+  .wr-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 1s ease; }
+
+  /* Notice box */
+  .notice { background: var(--amber-dim); border: 1px solid var(--amber); border-radius: var(--radius); padding: 12px 16px; font-size: 12px; color: var(--amber); margin-bottom: 20px; line-height: 1.6; }
+  .notice strong { font-weight: 600; }
+
+  /* Nicho info */
+  .nicho-box { background: var(--blue-dim); border: 1px solid var(--blue); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 24px; }
+  .nicho-title { font-size: 12px; font-weight: 600; color: var(--blue); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .nicho-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+
+  /* Footer */
+  .footer { border-top: 1px solid var(--border); padding: 16px 32px; font-size: 11px; color: var(--muted); font-family: var(--mono); display: flex; justify-content: space-between; }
+
+  /* How to use banner */
+  .how-to { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 24px; }
+  .how-to-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .how-to-steps { display: flex; gap: 0; flex-wrap: wrap; }
+  .how-step { display: flex; align-items: flex-start; gap: 8px; flex: 1; min-width: 200px; padding: 8px 12px; }
+  .how-step-num { font-family: var(--mono); font-size: 11px; color: var(--green); font-weight: 600; flex-shrink: 0; padding-top: 1px; }
+  .how-step-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  @media (max-width: 640px) {
+    .container { padding: 16px; }
+    .header { padding: 14px 16px; }
+    .trade-card { grid-template-columns: auto 1fr; }
+    .trade-right { grid-column: 2; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">📊</div>
+    <div>
+      <h1>Polymarket Bot — Simulação</h1>
+      <div class="header-sub">DRY RUN · Capital fictício $500 · Sem dinheiro real</div>
+    </div>
+  </div>
+  <div class="badge-live">SIMULAÇÃO ACTIVA</div>
+</div>
+
+<div class="container">
+
+  <!-- Como usar -->
+  <div class="how-to">
+    <div class="how-to-title">📖 Como ler este dashboard</div>
+    <div class="how-to-steps">
+      <div class="how-step"><div class="how-step-num">🟡</div><div class="how-step-text"><strong>ABERTO</strong> — o mercado ainda não resolveu. O bot está à espera do resultado.</div></div>
+      <div class="how-step"><div class="how-step-num">🟢</div><div class="how-step-text"><strong>GANHOU</strong> — o mercado resolveu a favor. PnL positivo confirmado.</div></div>
+      <div class="how-step"><div class="how-step-num">🔴</div><div class="how-step-text"><strong>PERDEU</strong> — o mercado resolveu contra. Capital perdido nessa posição.</div></div>
+      <div class="how-step"><div class="how-step-num">💡</div><div class="how-step-text">Posições ABERTAS de eventos já terminados fecham automaticamente no próximo ciclo (30 min).</div></div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row" id="kpi-row">
+    <div class="kpi blue">
+      <div class="kpi-label">Capital Inicial</div>
+      <div class="kpi-value" id="kpi-capital">$500</div>
+      <div class="kpi-sub">fictício (simulação)</div>
+    </div>
+    <div class="kpi" id="kpi-saldo-card">
+      <div class="kpi-label">Saldo Actual</div>
+      <div class="kpi-value" id="kpi-saldo">—</div>
+      <div class="kpi-sub" id="kpi-saldo-sub">a calcular...</div>
+    </div>
+    <div class="kpi" id="kpi-pnl-card">
+      <div class="kpi-label">P&L Total</div>
+      <div class="kpi-value" id="kpi-pnl">—</div>
+      <div class="kpi-sub" id="kpi-pnl-sub">trades fechados</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">Em Aberto</div>
+      <div class="kpi-value" id="kpi-open">—</div>
+      <div class="kpi-sub">posições activas</div>
+    </div>
+    <div class="kpi" id="kpi-wr-card">
+      <div class="kpi-label">Win Rate</div>
+      <div class="kpi-value" id="kpi-wr">—</div>
+      <div class="kpi-sub" id="kpi-wr-sub">trades fechados</div>
+    </div>
+  </div>
+
+  <!-- Nicho detectado -->
+  <div class="nicho-box">
+    <div class="nicho-title">🎯 Nicho detectado automaticamente</div>
+    <div class="nicho-text">
+      A carteira principal que o bot está a copiar (<strong>0x52ecea...</strong>, 86% win rate, $20M de volume) é especialista em
+      <strong>League of Legends (LoL)</strong> — LCK, LPL e torneios regionais. Todos os trades actuais são LoL.
+      Isto confirma que <strong>especialização por nicho funciona</strong>: esta carteira conhece o mercado melhor do que a média.
+    </div>
+  </div>
+
+  <!-- Trades -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Todas as posições</div>
+      <div class="count-badge" id="trade-count">0 trades</div>
+    </div>
+    <div class="notice" id="open-notice" style="display:none">
+      ⚠️ <strong>Posições abertas de eventos terminados:</strong> o bot fecha-as automaticamente no próximo ciclo de 30 minutos.
+      O P&L estimado abaixo é calculado com base no preço actual de mercado.
+    </div>
+    <div class="trades-grid" id="trades-container">
+      <div style="color:var(--text2);padding:32px;text-align:center;font-family:var(--mono);">
+        A carregar trades...
+      </div>
+    </div>
+  </div>
+
+  <!-- Carteiras -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Carteiras monitoradas</div>
+    </div>
+    <div class="wallets-grid" id="wallets-container"></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>polymarket-sim-bot · DRY RUN · sem ordens reais</span>
+  <span id="last-update">actualizado agora</span>
+</div>
+
+<script>
+// ─── DADOS REAIS DO BOT ───────────────────────────────────────────────────────
+// Para actualizar: substitui o conteúdo de TRADE_LOG e WALLETS
+// com os dados dos ficheiros data/trade_log.csv e data/qualified_wallets.json
+
+const TRADE_LOG_CSV = `timestamp,action,source_wallet,market_id,market_question,outcome,side,entry_price,size_usd,proceeds_usd,pnl_usd,reason
+2026-08-01T23:06:48.090135+00:00,OPEN,0x2005d16a84ceefa912d4e380cd32e7ff827875ea,0x87eed90ec2bd3a7b7200b700c3d9b9324b4e1a25a05632e69a201abeeb51ea97,ITF Lexington: Kylie Collins vs Anastasia Kulikova,Kylie Collins,BUY,0.49,25.0,,,copiado da carteira qualificada
+2026-08-01T23:06:48.090511+00:00,OPEN,0x2005d16a84ceefa912d4e380cd32e7ff827875ea,0x662356b8dcc1fbdee87914432e4f446704f32e08520d157c73fb154d68686dff,Counter-Strike: NRG vs Voca (BO3) - StarLadder StarSeries North American Qualifier Playoffs,NRG,BUY,0.78,25.0,,,copiado da carteira qualificada
+2026-08-01T23:06:48.090605+00:00,OPEN,0x2005d16a84ceefa912d4e380cd32e7ff827875ea,0x87eed90ec2bd3a7b7200b700c3d9b9324b4e1a25a05632e69a201abeeb51ea97,ITF Lexington: Kylie Collins vs Anastasia Kulikova,Anastasia Kulikova,BUY,0.49,25.0,,,copiado da carteira qualificada
+2026-08-02T12:33:52.777542+00:00,OPEN,0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3,0x285c287b25c52143b64c35c55ede16df3b63778714e2e5436c9ed33c3056965e,LoL: Top Esports vs JD Gaming - Game 1 Winner,JD Gaming,BUY,0.07,25.0,,,copiado da carteira qualificada
+2026-08-02T12:33:52.777867+00:00,OPEN,0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3,0xe246c845e96d5d979c541eae7d0caf0a400c9c16444e0337f652ff1a5d99b6ea,LoL: DN SOOPers vs HANJIN BRION - Game 2 Winner,HANJIN BRION,SELL,0.999,25.0,,,copiado da carteira qualificada
+2026-08-02T12:33:52.777954+00:00,OPEN,0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3,0x61a208f9c0cb98730b2f322317ddfdcba276feb5d2b1a2482eac948525ef8538,LoL: KT Rolster vs Hanwha Life Esports - Game 1 Winner,Hanwha Life Esports,BUY,0.19,25.0,,,copiado da carteira qualificada
+2026-08-02T12:33:52.778040+00:00,OPEN,0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3,0x2cdaba050415445b21a1631021d8c2d3c7b1ccf72f81536bd1c963a2e5450db9,LoL: LNG Esports vs Invictus Gaming - Game 2 Winner,Invictus Gaming,BUY,0.999,25.0,,,copiado da carteira qualificada
+2026-08-02T12:33:52.778119+00:00,OPEN,0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3,0xe027493beba147b29b0e990dcf60d9af4760dd41ab24d62ed321bee0cd92dc16,LoL: LNG Esports vs Invictus Gaming - Game 1 Winner,Invictus Gaming,BUY,0.9899930039,25.0,,,copiado da carteira qualificada
+2026-08-02T12:33:52.778187+00:00,OPEN,0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3,0x41fcdf0dde37fdfd08dc7d020cc79bd9567d5473479bb65725ad3c10663fef4d,LoL: DN SOOPers vs HANJIN BRION (BO3) - LCK Round 3-4 Rise Group,DN SOOPers,BUY,0.9989996878,25.0,,,copiado da carteira qualificada
+2026-08-02T12:33:52.778265+00:00,OPEN,0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3,0x35a17105ab9cadc57e0de8d1accacd88dfc6e4db5cb73889304d9d4e3437bac7,LoL: ThunderTalk Gaming vs Team WE (BO3) - LPL Group Ascend,Team WE,BUY,0.7,25.0,,,copiado da carteira qualificada
+2026-08-02T12:33:52.778352+00:00,OPEN,0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3,0xe2f60d2d25dac9efd80b183238f46717c1519213229dfef09e0b0a8dbd53cb77,LoL: DN SOOPers vs HANJIN BRION - Game 1 Winner,HANJIN BRION,BUY,0.03,25.0,,,copiado da carteira qualificada`;
+
+const WALLETS_DATA = [
+  { address: "0x52ecea7b3159f09db589e4f4ee64872fd0bba6f3", wins: 38, losses: 6, win_rate: 0.864, volume: 20739834, qualifies: true },
+  { address: "0x5f659bccbc353d000000000000000000000000", wins: 2, losses: 1, win_rate: 0.667, volume: 30392037, qualifies: true },
+];
+
+const CAPITAL = 500;
+
+// ─── PARSER CSV ───────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  const headers = lines[0].split(',');
+  return lines.slice(1).map(line => {
+    const vals = line.split(',');
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim().replace(/\r/g,''));
+    return obj;
+  });
+}
+
+function fmt(n) {
+  return n >= 0 ? `+$${n.toFixed(2)}` : `-$${Math.abs(n).toFixed(2)}`;
+}
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-PT', { day:'2-digit', month:'short' }) + ' ' +
+         d.toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' });
+}
+function shortWallet(addr) {
+  return addr.slice(0,8) + '...' + addr.slice(-6);
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render() {
+  const rows = parseCSV(TRADE_LOG_CSV);
+  const opens = rows.filter(r => r.action === 'OPEN');
+  const closes = rows.filter(r => r.action === 'CLOSE');
+
+  // Agrupa opens e closes por market_id+outcome
+  const positions = opens.map(o => {
+    const closeMatch = closes.find(c =>
+      c.market_id === o.market_id && c.outcome === o.outcome
+    );
+    const size = parseFloat(o.size_usd) || 0;
+    const price = parseFloat(o.entry_price) || 0;
+
+    let status, pnl, pnlEst;
+    if (closeMatch) {
+      pnl = parseFloat(closeMatch.pnl_usd) || 0;
+      status = pnl >= 0 ? 'win' : 'loss';
+    } else {
+      status = 'open';
+      // Estimativa: se preço > 0.95 provavelmente vai ganhar, se < 0.05 vai perder
+      if (price >= 0.95) pnlEst = (size / price * 1.0) - size;
+      else if (price <= 0.05) pnlEst = -size;
+      else pnlEst = null;
+    }
+    return { ...o, status, pnl: pnl ?? null, pnlEst, size };
+  });
+
+  // KPIs
+  let saldo = CAPITAL;
+  let totalPnl = 0;
+  let wins = 0, totalClosed = 0;
+  opens.forEach(o => saldo -= parseFloat(o.size_usd) || 0);
+  closes.forEach(c => {
+    saldo += parseFloat(c.proceeds_usd) || 0;
+    const p = parseFloat(c.pnl_usd) || 0;
+    totalPnl += p;
+    totalClosed++;
+    if (p > 0) wins++;
+  });
+
+  const openCount = positions.filter(p => p.status === 'open').length;
+  const wr = totalClosed > 0 ? Math.round(wins/totalClosed*100) : null;
+
+  document.getElementById('kpi-saldo').textContent = `$${saldo.toFixed(2)}`;
+  const saldoCard = document.getElementById('kpi-saldo-card');
+  saldoCard.className = 'kpi ' + (saldo >= CAPITAL ? 'green' : saldo < CAPITAL * 0.85 ? 'red' : 'amber');
+  document.getElementById('kpi-saldo-sub').textContent = saldo >= CAPITAL ? '▲ acima do inicial' : '▼ abaixo do inicial';
+
+  document.getElementById('kpi-pnl').textContent = totalClosed > 0 ? fmt(totalPnl) : '$0.00';
+  const pnlCard = document.getElementById('kpi-pnl-card');
+  pnlCard.className = 'kpi ' + (totalPnl > 0 ? 'green' : totalPnl < 0 ? 'red' : '');
+
+  document.getElementById('kpi-open').textContent = openCount;
+  document.getElementById('kpi-wr').textContent = wr !== null ? `${wr}%` : '—';
+  const wrCard = document.getElementById('kpi-wr-card');
+  wrCard.className = 'kpi ' + (wr === null ? '' : wr >= 55 ? 'green' : wr >= 40 ? 'amber' : 'red');
+  document.getElementById('kpi-wr-sub').textContent = wr !== null ? `${wins}W / ${totalClosed-wins}L` : 'sem trades fechados';
+
+  document.getElementById('trade-count').textContent = `${positions.length} trades`;
+
+  // Aviso de opens antigos
+  const hasOldOpen = positions.some(p => p.status === 'open');
+  document.getElementById('open-notice').style.display = hasOldOpen ? 'block' : 'none';
+
+  // Render trades
+  const container = document.getElementById('trades-container');
+  if (positions.length === 0) {
+    container.innerHTML = '<div style="color:var(--text2);padding:32px;text-align:center;font-family:var(--mono);">Sem trades registados ainda.</div>';
+    return;
+  }
+
+  // Ordem: abertos primeiro, depois fechados
+  const sorted = [...positions].sort((a,b) => {
+    if (a.status === 'open' && b.status !== 'open') return -1;
+    if (a.status !== 'open' && b.status === 'open') return 1;
+    return new Date(b.timestamp) - new Date(a.timestamp);
+  });
+
+  container.innerHTML = sorted.map(p => {
+    const statusLabel = p.status === 'open' ? 'ABERTO' : p.status === 'win' ? 'GANHOU' : 'PERDEU';
+    const dotClass = `trade-status-dot dot-${p.status}`;
+    const pnlClass = `trade-pnl pnl-${p.status}`;
+    let pnlDisplay;
+    if (p.status === 'open') {
+      pnlDisplay = `<span class="trade-pnl pnl-open">ABERTO</span>`;
+    } else {
+      pnlDisplay = `<span class="${pnlClass}">${fmt(p.pnl)}</span>`;
+    }
+
+    const nicho = p.market_question.includes('LoL') ? '🎮 LoL' :
+                  p.market_question.includes('Counter-Strike') ? '🎮 CS' :
+                  p.market_question.includes('ITF') || p.market_question.includes('tennis') ? '🎾 Ténis' : '📊 Outro';
+
+    return `
+    <div class="trade-card status-${p.status}">
+      <div class="${dotClass}"></div>
+      <div class="trade-main">
+        <div class="trade-question" title="${p.market_question}">${p.market_question}</div>
+        <div class="trade-meta">
+          <span class="trade-tag tag-outcome">${p.outcome}</span>
+          <span class="trade-tag tag-${p.side.toLowerCase()}">${p.side}</span>
+          <span class="trade-tag tag-wallet">${shortWallet(p.source_wallet)}</span>
+          <span class="trade-tag" style="background:var(--surface2);color:var(--text2)">${nicho}</span>
+          <span class="trade-time">${fmtDate(p.timestamp)}</span>
+        </div>
+      </div>
+      <div class="trade-right">
+        ${pnlDisplay}
+        <div class="trade-size">$${p.size_usd} @ ${(parseFloat(p.entry_price)*100).toFixed(0)}¢</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Render wallets
+  const wc = document.getElementById('wallets-container');
+  wc.innerHTML = WALLETS_DATA.map(w => `
+    <div class="wallet-card">
+      <div class="wallet-addr">${w.address.slice(0,16)}...${w.address.slice(-8)}</div>
+      <div class="wallet-stats">
+        <div class="wallet-stat">
+          <div class="wallet-stat-val" style="color:var(--green)">${Math.round(w.win_rate*100)}%</div>
+          <div class="wallet-stat-label">Win Rate</div>
+        </div>
+        <div class="wallet-stat">
+          <div class="wallet-stat-val" style="color:var(--green)">${w.wins}</div>
+          <div class="wallet-stat-label">Ganhos</div>
+        </div>
+        <div class="wallet-stat">
+          <div class="wallet-stat-val" style="color:var(--red)">${w.losses}</div>
+          <div class="wallet-stat-label">Perdas</div>
+        </div>
+      </div>
+      <div class="wr-bar"><div class="wr-fill" style="width:${w.win_rate*100}%"></div></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text2)">
+        Vol: $${(w.volume/1e6).toFixed(1)}M &nbsp;·&nbsp;
+        ${w.qualifies ? '<span style="color:var(--green)">✓ A ser copiada</span>' : '<span style="color:var(--muted)">Não qualificada</span>'}
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('last-update').textContent =
+    'actualizado às ' + new Date().toLocaleTimeString('pt-PT');
+}
+
+render();
+</script>
+</body>
+</html>
