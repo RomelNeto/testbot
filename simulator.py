@@ -21,6 +21,7 @@ import os
 from datetime import datetime, timezone
 
 import config
+import polymarket_client as pm
 
 
 def _now_iso() -> str:
@@ -86,10 +87,16 @@ class SimulationState:
 def _append_trade_log(row: dict) -> None:
     os.makedirs(config.DATA_DIR, exist_ok=True)
     file_exists = os.path.exists(config.TRADE_LOG_FILE)
+    # IMPORTANTE: novas colunas sempre vao no FINAL desta lista, nunca no
+    # meio. O arquivo trade_log.csv ja existente no seu repositorio tem um
+    # cabecalho fixo escrito na primeira execucao -- inserir uma coluna no
+    # meio desalinharia todas as linhas novas contra esse cabecalho antigo.
+    # Colunas adicionadas no final continuam compativeis (linhas antigas
+    # simplesmente nao tem valor nela).
     fieldnames = [
         "timestamp", "action", "source_wallet", "market_id", "market_question",
         "outcome", "side", "entry_price", "size_usd", "fee_usd", "proceeds_usd",
-        "pnl_usd", "reason",
+        "pnl_usd", "reason", "estimated_close_date",
     ]
     with open(config.TRADE_LOG_FILE, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -150,6 +157,20 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
     fee_usd = round(size_usd * config.TAKER_FEE_PCT, 2)
     net_invested_usd = round(size_usd - fee_usd, 2)
 
+    # NOVO: tenta capturar a data prevista de resolucao do mercado (endDate),
+    # olhando a posicao da PROPRIA carteira de origem nesse mercado (ela
+    # acabou de negociar, entao a posicao dela ja deve existir). E so uma
+    # ESTIMATIVA -- o evento real pode demorar mais para resolver de verdade
+    # (ex.: disputas, atrasos). Se nao conseguir, fica sem estimativa em vez
+    # de quebrar a copia do trade.
+    estimated_close_date = None
+    try:
+        source_position = pm.get_position_for_market(source_wallet, market_id)
+        if source_position:
+            estimated_close_date = source_position.get("endDate") or source_position.get("end_date")
+    except Exception:
+        pass  # estimativa e best-effort, nunca deve impedir a copia do trade
+
     position_key = f"{market_id}:{outcome}:{trade_id}"
     state.open_positions[position_key] = {
         "source_wallet": source_wallet,
@@ -163,6 +184,7 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
         "size_usd": size_usd,
         "fee_usd": fee_usd,
         "net_invested_usd": net_invested_usd,
+        "estimated_close_date": estimated_close_date,
         "opened_at": _now_iso(),
     }
     if trade_id:
@@ -183,6 +205,7 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
         "reason": "copiado da carteira qualificada (preco original "
                   f"{entry_price}, com slippage {config.SLIPPAGE_PCT:.0%} "
                   f"e taxa {config.TAKER_FEE_PCT:.0%})",
+        "estimated_close_date": estimated_close_date or "",
     })
     return True
 

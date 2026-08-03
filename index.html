@@ -55,6 +55,9 @@
   .tag-sell{background:var(--red-dim);color:var(--red);}
   .tag-wallet{background:var(--surface2);color:var(--text2);}
   .tag-nicho{background:var(--surface2);color:var(--text2);}
+  .tag-close{background:var(--blue-dim);color:var(--blue);}
+  .tag-close-late{background:var(--red-dim);color:var(--red);}
+  .tag-close-unknown{background:var(--surface2);color:var(--text2);}
   .trade-time{font-size:11px;color:var(--muted);font-family:var(--mono);}
   .trade-right{text-align:right;flex-shrink:0;}
   .trade-pnl{font-size:15px;font-weight:700;font-family:var(--mono);}
@@ -198,6 +201,37 @@ function nicho(question) {
   return '📊 Outro';
 }
 
+// NOVO: constrói o rótulo de data estimada de fechamento para uma posição
+// ABERTA. estimated_close_date vem do trade_log.csv (coluna nova, pode vir
+// vazia em linhas antigas ou quando o bot não conseguiu capturar a data da
+// carteira de origem no momento da cópia) -- nesse caso mostramos um aviso
+// claro em vez de esconder a informação.
+function closeDateLabel(estRaw) {
+  if (!estRaw) {
+    return `<span class="tag tag-close-unknown">📅 sem estimativa de fechamento</span>`;
+  }
+  const d = new Date(estRaw);
+  if (isNaN(d.getTime())) {
+    return `<span class="tag tag-close-unknown">📅 sem estimativa de fechamento</span>`;
+  }
+  const now = new Date();
+  const diffDays = Math.round((d - now) / 86400000);
+  const dateStr = d.toLocaleDateString('pt-PT', {day:'2-digit', month:'short', year:'numeric'});
+
+  let rel, late = false;
+  if (diffDays > 1)      rel = `estimado em ~${diffDays} dias`;
+  else if (diffDays === 1) rel = 'estimado para amanhã';
+  else if (diffDays === 0) rel = 'estimado para hoje';
+  else {
+    late = true;
+    const daysLate = Math.abs(diffDays);
+    rel = daysLate === 1 ? 'venceu ontem, a aguardar resolução' : `venceu há ${daysLate} dias, a aguardar resolução`;
+  }
+
+  const cls = late ? 'tag-close-late' : 'tag-close';
+  return `<span class="tag ${cls}" title="Estimativa baseada na posição da carteira copiada -- o fechamento real do bot depende do mercado resolver.">📅 ${dateStr} · ${rel}</span>`;
+}
+
 // ─── RENDER KPIs ──────────────────────────────────────────────────────────────
 function renderKPIs(rows) {
   const opens  = rows.filter(r => r.action === 'OPEN');
@@ -255,7 +289,7 @@ function renderTrades(rows) {
     );
     const pnl    = c ? (parseFloat(c.pnl_usd) || 0) : null;
     const status = c ? (pnl >= 0 ? 'win' : 'loss') : 'open';
-    return { ...o, pnl, status };
+    return { ...o, pnl, status, estimated_close_date: o.estimated_close_date };
   });
 
   document.getElementById('trade-count').textContent = `${positions.length} trade${positions.length !== 1 ? 's' : ''}`;
@@ -283,6 +317,9 @@ function renderTrades(rows) {
     } else {
       pnlHtml = `<span class="trade-pnl pnl-${p.status}">${fmt(p.pnl)}</span>`;
     }
+    // NOVO: só mostra a data estimada de fechamento em posições ainda ABERTAS
+    // -- uma vez fechada, o que importa é o resultado, não a estimativa.
+    const closeDateHtml = p.status === 'open' ? closeDateLabel(p.estimated_close_date) : '';
     return `
     <div class="trade-card status-${p.status}">
       <div class="dot dot-${p.status}"></div>
@@ -293,6 +330,7 @@ function renderTrades(rows) {
           <span class="tag tag-${p.side.toLowerCase()}">${p.side}</span>
           <span class="tag tag-wallet">${shortWallet(p.source_wallet)}</span>
           <span class="tag tag-nicho">${nicho(p.market_question)}</span>
+          ${closeDateHtml}
           <span class="trade-time">${fmtDate(p.timestamp)}</span>
         </div>
       </div>
