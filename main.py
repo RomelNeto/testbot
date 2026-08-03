@@ -104,10 +104,19 @@ def _try_close_via_source_wallet_positions(state: SimulationState, position_key:
     está comprovadamente funcionando -- é dela que vêm os win rates reais
     no ranking de carteiras (ex.: 77%, 85%, 80%).
 
-    A posição da carteira de origem nesse mercado, se resolvida, tem um
-    campo de PnL (realizedPnl/cashPnl/pnl) cujo SINAL já diz se o outcome
-    ganhou (positivo) ou perdeu (negativo) -- não precisamos do preço exato
-    de nenhuma outra fonte.
+    FIX v6 -- correção importante confirmada com dados reais: o campo
+    "realizedPnl" fica em 0 para posições PERDEDORAS (o resgate on-chain só
+    acontece quando há algo a resgatar; uma posição perdedora não precisa de
+    "redeem", então nunca sai de 0, mesmo já resolvida havia semanas). Usar
+    o sinal de realizedPnl como fizemos antes deixava essas perdas presas
+    para sempre em "aberto".
+
+    O sinal correto e confiável é "curPrice" (o preço atual/final da
+    outcome): perto de 1.0 significa que a outcome VENCEU, perto de 0.0
+    significa que PERDEU. Isso é verdade tanto para vitórias quanto
+    derrotas, resgatadas ou não. Mantemos o sinal de PnL (cashPnl/
+    realizedPnl) como reforço secundário só para o caso raro de curPrice
+    vir ausente ou não numérico.
 
     Retorna True se a posição foi fechada.
     """
@@ -149,22 +158,37 @@ def _try_close_via_source_wallet_positions(state: SimulationState, position_key:
     if not is_resolved:
         return False  # ainda ativa, segundo a propria carteira copiada
 
-    pnl = _first_present(source_position, ["realizedPnl", "cashPnl", "pnl", "profit"], None)
-    if pnl is None:
-        return False
-    try:
-        pnl = float(pnl)
-    except (TypeError, ValueError):
-        return False
+    resolution_price = None
+    resultado = None
 
-    if pnl > 0.01:
-        resolution_price = 1.0
-        resultado = "GANHOU ✓"
-    elif pnl < -0.01:
-        resolution_price = 0.0
-        resultado = "PERDEU ✗"
-    else:
-        return False  # pnl ~0, inconclusivo -- deixa outras estrategias tentarem
+    # FIX v6, sinal PRIMARIO: curPrice (preco atual/final da outcome).
+    cur_price = _first_present(source_position, ["curPrice", "currentPrice", "price"], None)
+    if cur_price is not None:
+        try:
+            cur_price = float(cur_price)
+            if cur_price >= 0.99:
+                resolution_price, resultado = 1.0, "GANHOU ✓"
+            elif cur_price <= 0.01:
+                resolution_price, resultado = 0.0, "PERDEU ✗"
+        except (TypeError, ValueError):
+            pass
+
+    # Fallback secundario: sinal do PnL, so se curPrice nao foi conclusivo
+    # (ex.: ausente, ou um valor intermediario estranho).
+    if resolution_price is None:
+        pnl = _first_present(source_position, ["cashPnl", "realizedPnl", "pnl", "profit"], None)
+        if pnl is not None:
+            try:
+                pnl = float(pnl)
+                if pnl > 0.01:
+                    resolution_price, resultado = 1.0, "GANHOU ✓ (via PnL)"
+                elif pnl < -0.01:
+                    resolution_price, resultado = 0.0, "PERDEU ✗ (via PnL)"
+            except (TypeError, ValueError):
+                pass
+
+    if resolution_price is None:
+        return False  # marcado como resolvido mas sem sinal conclusivo -- deixa outras estrategias tentarem
 
     print(f"  [{resultado} via /positions da carteira de origem] "
           f"{pos['market_question'][:55]}...")

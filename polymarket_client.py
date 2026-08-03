@@ -80,14 +80,24 @@ def get_market_by_condition_id(condition_id: str) -> Optional[dict]:
     2. Parâmetro 'condition_ids' (plural) — documentado mas inconsistente
     3. Buscar mercados fechados recentes e procurar pelo ID manualmente
        (fallback mais lento mas mais fiável)
+
+    FIX v6 -- correção de segurança: confirmamos com dados reais que a
+    Gamma API, quando não reconhece o parâmetro de filtro, NÃO retorna
+    vazio -- ela ignora o filtro e devolve o mercado padrão da consulta
+    (aparentemente o de maior volume). Sem validação, isso faria o bot
+    aceitar um mercado TOTALMENTE ERRADO como se fosse o que procuramos.
+    Agora cada estratégia confere se o conditionId devolvido realmente
+    bate com o pedido antes de aceitar o resultado.
     """
     # Estratégia 1: conditionId singular
     try:
         result = _get(f"{config.GAMMA_API_BASE}/markets",
                       params={"conditionId": condition_id, "limit": 5})
         if isinstance(result, list) and result:
-            return result[0]
-        elif isinstance(result, dict) and result:
+            match = next((m for m in result if m.get("conditionId") == condition_id), None)
+            if match:
+                return match
+        elif isinstance(result, dict) and result.get("conditionId") == condition_id:
             return result
     except Exception:
         pass
@@ -97,14 +107,16 @@ def get_market_by_condition_id(condition_id: str) -> Optional[dict]:
         result = _get(f"{config.GAMMA_API_BASE}/markets",
                       params={"condition_ids": condition_id, "limit": 5})
         if isinstance(result, list) and result:
-            return result[0]
+            match = next((m for m in result if m.get("conditionId") == condition_id), None)
+            if match:
+                return match
     except Exception:
         pass
 
     # Estratégia 3: busca directa pelo ID no endpoint /markets/{id}
     try:
         result = _get(f"{config.GAMMA_API_BASE}/markets/{condition_id}")
-        if isinstance(result, dict) and result:
+        if isinstance(result, dict) and result.get("conditionId") == condition_id:
             return result
     except Exception:
         pass

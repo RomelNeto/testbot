@@ -111,21 +111,47 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
         if not is_resolved:
             continue
 
-        pnl = _first_present(p, ["realizedPnl", "cashPnl", "pnl", "profit"], None)
-        if pnl is None:
-            continue
-        try:
-            pnl = float(pnl)
-        except (TypeError, ValueError):
+        # FIX v6 -- correcao importante confirmada com dados reais:
+        # "realizedPnl" fica em 0 para posicoes PERDEDORAS (o resgate on-chain
+        # so acontece quando ha algo a resgatar; perdas nao precisam de
+        # "redeem", entao o campo nunca sai de 0). Usar so o sinal de
+        # realizedPnl fazia perdas reais serem contadas como "neutras" em vez
+        # de derrota, inflando o win rate. Agora usamos "curPrice" (preco
+        # final da outcome: ~1 = venceu, ~0 = perdeu) como sinal primario,
+        # com o PnL como reforco so quando curPrice nao for conclusivo.
+        outcome_won = None
+        cur_price = _first_present(p, ["curPrice", "currentPrice", "price"], None)
+        if cur_price is not None:
+            try:
+                cur_price = float(cur_price)
+                if cur_price >= 0.99:
+                    outcome_won = True
+                elif cur_price <= 0.01:
+                    outcome_won = False
+            except (TypeError, ValueError):
+                pass
+
+        if outcome_won is None:
+            pnl = _first_present(p, ["cashPnl", "realizedPnl", "pnl", "profit"], None)
+            if pnl is not None:
+                try:
+                    pnl = float(pnl)
+                    if pnl > 0.01:
+                        outcome_won = True
+                    elif pnl < -0.01:
+                        outcome_won = False
+                except (TypeError, ValueError):
+                    pass
+
+        if outcome_won is None:
+            pnl_zero += 1  # sem sinal conclusivo (nem curPrice nem PnL bateram) -- nao entra no calculo
             continue
 
         resolved += 1
-        if pnl > 0.01:       # margem de 1 centavo para evitar falsos positivos
+        if outcome_won:
             wins += 1
-        elif pnl < -0.01:
-            losses += 1
         else:
-            pnl_zero += 1    # pnl ~0: ignorado no win rate mas contado para debug
+            losses += 1
 
     # FIX: denominador = wins + losses (ignora pnl~0)
     denominator = wins + losses
