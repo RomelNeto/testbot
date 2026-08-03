@@ -98,6 +98,28 @@ def _append_trade_log(row: dict) -> None:
         "outcome", "side", "entry_price", "size_usd", "fee_usd", "proceeds_usd",
         "pnl_usd", "reason", "estimated_close_date",
     ]
+
+    # FIX (bug real detetado): o cabecalho gravado na PRIMEIRA execucao do
+    # bot ficava congelado para sempre -- mesmo apos o codigo evoluir e
+    # passar a escrever mais colunas (taxa, depois data estimada), o
+    # cabecalho no ficheiro continuava com a versao antiga. Resultado: as
+    # colunas do dashboard ficavam desalinhadas com os dados reais (ex.: o
+    # P&L de uma posicao fechada aparecia como "+$0.00" porque o dashboard
+    # estava a ler o valor de outra coluna). Aqui corrigimos o cabecalho
+    # automaticamente sempre que ele nao bate com as colunas atuais, antes
+    # de escrever a nova linha.
+    if file_exists:
+        with open(config.TRADE_LOG_FILE, newline="") as f:
+            first_line = f.readline().rstrip("\r\n")
+        current_header = ",".join(fieldnames)
+        if first_line != current_header:
+            with open(config.TRADE_LOG_FILE, newline="") as f:
+                lines = f.readlines()
+            if lines:
+                lines[0] = current_header + "\n"
+                with open(config.TRADE_LOG_FILE, "w", newline="") as f:
+                    f.writelines(lines)
+
     with open(config.TRADE_LOG_FILE, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         if not file_exists:
