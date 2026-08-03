@@ -6,12 +6,19 @@ Uso:
     python main.py rank
     python main.py cycle
     python main.py run
-    python main.py reset   ← NOVO: limpa posições e log, reinicia simulação
+    python main.py reset   ← limpa posições e log, reinicia simulação
 
-FIXES v3:
-- Mecanismo de fecho com diagnóstico detalhado (imprime o que a API retorna)
-- Posições com mais de MAX_POSITION_AGE_DAYS dias fechadas automaticamente
-- Comando 'reset' para reiniciar a simulação do zero
+FIXES v4:
+- _check_open_position_resolutions agora usa PRIMEIRO os dados de
+  /positions da própria carteira copiada (redeemable + sinal do
+  realizedPnl) -- essa fonte já está comprovadamente funcionando (é o
+  que alimenta o win rate real no wallet_ranking.py). A consulta à
+  Gamma API por conditionId (que nunca encontrava o mercado) vira
+  fallback secundário, e o timeout por idade continua como rede de
+  segurança final.
+- maybe_copy_trade (em simulator.py) agora respeita
+  config.MAX_POSITIONS_PER_MARKET, evitando concentrar capital quando a
+  carteira copiada faz várias compras seguidas no mesmo mercado.
 """
 from __future__ import annotations
 
@@ -28,6 +35,13 @@ import wallet_discovery
 from simulator import SimulationState, maybe_copy_trade, close_position
 
 MAX_POSITION_AGE_DAYS = 3  # jogos de LoL resolvem em horas — 3 dias é muito conservador
+
+
+def _first_present(d: dict, keys: list[str], default=None):
+    for k in keys:
+        if k in d and d[k] is not None:
+            return d[k]
+    return default
 
 
 def cmd_discover() -> None:
@@ -79,19 +93,152 @@ def cmd_reset() -> None:
     print("O próximo ciclo começa do zero.")
 
 
+def _try_close_via_source_wallet_positions(state: SimulationState, position_key: str,
+                                            pos: dict, positions_cache: dict) -> bool:
+    """
+    FIX v4 -- estratégia PRIMÁRIA de fechamento.
+
+    Em vez de perguntar à Gamma API "esse mercado já resolveu?" (que nunca
+    encontrava o mercado nas tentativas anteriores), perguntamos à API de
+    posições (/positions) da PRÓPRIA carteira que copiamos. Essa fonte já
+    está comprovadamente funcionando -- é dela que vêm os win rates reais
+    no ranking de carteiras (ex.: 77%, 85%, 80%).
+
+    A posição da carteira de origem nesse mercado, se resolvida, tem um
+    campo de PnL (realizedPnl/cashPnl/pnl) cujo SINAL já diz se o outcome
+    ganhou (positivo) ou perdeu (negativo) -- não precisamos do preço exato
+    de nenhuma outra fonte.
+
+    Retorna True se a posição foi fechada.
+    """
+    source_wallet = pos["source_wallet"]
+    market_id = pos["market_id"]
+
+    if source_wallet not in positions_cache:
+        try:
+            raw_positions = pm.get_positions_for_user(source_wallet)
+        except Exception as exc:
+            print(f"  [erro] ao buscar posicoes de {source_wallet[:12]}...: {exc}")
+            raw_positions = []
+        lookup = {}
+        for p in raw_positions:
+            key = _first_present(p, ["conditionId", "condition_id", "market", "asset", "marketId"])
+            if key:
+                lookup[key] = p
+        positions_cache[source_wallet] = lookup
+
+    source_position = positions_cache[source_wallet].get(market_id)
+    if not source_position:
+        return False  # a carteira de origem nao tem (ou nao achamos) essa posicao
+
+    is_resolved = bool(_first_present(
+        source_position, ["redeemable", "resolved", "closed", "isResolved"], False
+    ))
+    if not is_resolved:
+        return False  # ainda ativa, segundo a propria carteira copiada
+
+    pnl = _first_present(source_position, ["realizedPnl", "cashPnl", "pnl", "profit"], None)
+    if pnl is None:
+        return False
+    try:
+        pnl = float(pnl)
+    except (TypeError, ValueError):
+        return False
+
+    if pnl > 0.01:
+        resolution_price = 1.0
+        resultado = "GANHOU ✓"
+    elif pnl < -0.01:
+        resolution_price = 0.0
+        resultado = "PERDEU ✗"
+    else:
+        return False  # pnl ~0, inconclusivo -- deixa outras estrategias tentarem
+
+    print(f"  [{resultado} via /positions da carteira de origem] "
+          f"{pos['market_question'][:55]}...")
+    close_position(state, position_key, resolution_price,
+                   reason="resolvido (via posicoes da carteira de origem)")
+    return True
+
+
+def _try_close_via_gamma_api(state: SimulationState, position_key: str, pos: dict) -> bool:
+    """Estratégia SECUNDÁRIA (fallback): pergunta à Gamma API pelo mercado
+    diretamente. Mantida como reforço, caso a carteira de origem já tenha
+    fechado/resgatado a posição dela e não apareça mais em /positions."""
+    market_id = pos["market_id"]
+    try:
+        market = pm.get_market_by_condition_id(market_id)
+    except Exception as exc:
+        print(f"  [erro] ao consultar {market_id[:16]}...: {exc}")
+        return False
+
+    if not market:
+        return False
+
+    is_closed = (
+        market.get("closed") is True
+        or market.get("active") is False
+        or str(market.get("closed", "")).lower() == "true"
+    )
+    if not is_closed:
+        return False
+
+    outcomes = market.get("outcomes") or []
+    outcome_prices = market.get("outcomePrices") or []
+    if isinstance(outcome_prices, str):
+        try:
+            outcome_prices = json.loads(outcome_prices)
+        except Exception:
+            outcome_prices = []
+
+    resolution_price = None
+    idx = pos.get("outcome_index")
+    if idx is not None:
+        try:
+            idx = int(idx)
+            if idx < len(outcome_prices):
+                resolution_price = float(outcome_prices[idx])
+        except (TypeError, ValueError, IndexError):
+            resolution_price = None
+
+    if resolution_price is None and pos.get("outcome") in outcomes:
+        idx = outcomes.index(pos["outcome"])
+        if idx < len(outcome_prices):
+            try:
+                resolution_price = float(outcome_prices[idx])
+            except (TypeError, ValueError):
+                resolution_price = None
+
+    if resolution_price is None:
+        return False
+
+    resultado = "GANHOU ✓" if resolution_price >= 0.99 else "PERDEU ✗"
+    print(f"  [{resultado} via Gamma API] {pos['market_question'][:55]}...")
+    close_position(state, position_key, resolution_price,
+                   reason="resolvido (via Gamma API)")
+    return True
+
+
 def _check_open_position_resolutions(state: SimulationState) -> None:
     """
-    FIX v3: diagnóstico detalhado + timeout agressivo para jogos de LoL.
-    LoL resolve em horas — qualquer posição com +3 dias é claramente fantasma.
+    Para cada posição aberta, tenta fechar em 3 estratégias, em ordem:
+      1. /positions da carteira de origem (mais confiável, já comprovada)
+      2. Gamma API por conditionId (fallback secundário)
+      3. Timeout por idade (rede de segurança final, marca como perdida)
     """
     now = datetime.now(timezone.utc)
     cutoff_age = now - timedelta(days=MAX_POSITION_AGE_DAYS)
+    positions_cache: dict = {}  # wallet -> {market_id: position}
 
     for position_key in list(state.open_positions.keys()):
         pos = state.open_positions[position_key]
-        market_id = pos["market_id"]
 
-        # Timeout: fecha posições muito antigas como perdidas
+        if _try_close_via_source_wallet_positions(state, position_key, pos, positions_cache):
+            continue
+
+        if _try_close_via_gamma_api(state, position_key, pos):
+            continue
+
         opened_at_str = pos.get("opened_at", "")
         if opened_at_str:
             try:
@@ -105,61 +252,7 @@ def _check_open_position_resolutions(state: SimulationState) -> None:
             except ValueError:
                 pass
 
-        # Busca o mercado com 4 estratégias de fallback
-        try:
-            market = pm.get_market_by_condition_id(market_id)
-        except Exception as exc:
-            print(f"  [erro] ao consultar {market_id[:16]}...: {exc}")
-            continue
-
-        if not market:
-            print(f"  [aberto] {pos['market_question'][:55]}... → não encontrado na API")
-            continue
-
-        # Diagnóstico: o que a API está a devolver
-        is_closed = (
-            market.get("closed") is True
-            or market.get("active") is False
-            or str(market.get("closed", "")).lower() == "true"
-        )
-
-        if not is_closed:
-            print(f"  [aberto] {pos['market_question'][:55]}... → API diz activo")
-            continue
-
-        # Mercado fechado — extrai o preço de resolução
-        outcomes = market.get("outcomes") or []
-        outcome_prices = market.get("outcomePrices") or []
-
-        # outcomePrices pode vir como string JSON '["1","0"]'
-        if isinstance(outcome_prices, str):
-            try:
-                outcome_prices = json.loads(outcome_prices)
-            except Exception:
-                outcome_prices = []
-
-        resolution_price = None
-        outcome_name = pos.get("outcome", "")
-
-        if outcome_name in outcomes:
-            idx = outcomes.index(outcome_name)
-            if idx < len(outcome_prices):
-                try:
-                    resolution_price = float(outcome_prices[idx])
-                except (TypeError, ValueError):
-                    pass
-
-        if resolution_price is not None:
-            resultado = "GANHOU ✓" if resolution_price >= 0.99 else "PERDEU ✗"
-            print(f"  [{resultado}] {pos['market_question'][:55]}... "
-                  f"→ {outcome_name} @ {resolution_price}")
-            close_position(state, position_key, resolution_price)
-        else:
-            # Mercado fechado mas sem preço claro → fecha como perdida por segurança
-            print(f"  [fechado s/preço] {pos['market_question'][:55]}... "
-                  f"outcomes={outcomes} prices={outcome_prices} → marcando perdida")
-            close_position(state, position_key, 0.0,
-                           reason="mercado fechado sem preço de resolução claro")
+        print(f"  [aberto] {pos['market_question'][:55]}... → ainda não resolvido em nenhuma fonte")
 
 
 def run_single_cycle(state: SimulationState,
@@ -193,7 +286,7 @@ def run_single_cycle(state: SimulationState,
     if state.open_positions:
         print(f"\nA verificar {len(state.open_positions)} posição(ões) aberta(s)...")
         _check_open_position_resolutions(state)
-    
+
     state.save()
     print(f"\nSaldo final: ${state.cash_balance:.2f} | "
           f"Posições abertas: {len(state.open_positions)}")

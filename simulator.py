@@ -76,6 +76,9 @@ class SimulationState:
     def is_wallet_paused(self, wallet_address: str) -> bool:
         return self.consecutive_losses.get(wallet_address, 0) >= config.MAX_CONSECUTIVE_LOSSES_PER_WALLET
 
+    def count_open_positions_for_market(self, market_id: str) -> int:
+        return sum(1 for p in self.open_positions.values() if p.get("market_id") == market_id)
+
 
 def _append_trade_log(row: dict) -> None:
     os.makedirs(config.DATA_DIR, exist_ok=True)
@@ -114,6 +117,12 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
     entry_price = float(source_trade.get("price", 0) or 0)
     if entry_price <= 0 or entry_price >= 1:
         return False  # preco invalido para um mercado binario (0-1)
+
+    # NOVO: limite de exposicao por mercado -- impede que varias compras da
+    # mesma carteira no mesmo evento (ex.: escalando uma posicao aos poucos)
+    # sejam todas copiadas, concentrando capital demais num unico evento.
+    if market_id and state.count_open_positions_for_market(market_id) >= config.MAX_POSITIONS_PER_MARKET:
+        return False
 
     size_usd = round(config.SIMULATED_CAPITAL_USD * config.POSITION_SIZE_PCT, 2)
     if size_usd > state.cash_balance:

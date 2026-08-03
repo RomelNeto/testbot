@@ -4,6 +4,12 @@ Cliente para as APIs públicas do Polymarket.
 FIXES v3:
 - get_market_by_condition_id: tenta 3 estratégias em cascata para garantir
   que mercados resolvidos são sempre encontrados, mesmo que um endpoint falhe.
+
+FIX v4: esta funcao agora e usada so como FALLBACK secundario em main.py
+(a estrategia primaria de fechamento usa /positions da carteira de origem,
+que ja esta comprovadamente funcionando). Mantida aqui sem alteracoes,
+porque ainda serve de reforco quando a carteira de origem ja resgatou a
+posicao dela e ela some do /positions.
 """
 from __future__ import annotations
 

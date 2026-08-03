@@ -25,6 +25,12 @@ POSITION_SIZE_PCT = 0.05
 # Numero maximo de posicoes abertas ao mesmo tempo (protecao de exposicao).
 MAX_OPEN_POSITIONS = 8
 
+# NOVO: numero maximo de posicoes copiadas no MESMO mercado (mesmo market_id).
+# Evita que o bot concentre todo o capital num unico evento quando a carteira
+# de origem faz varias compras seguidas no mesmo mercado (ex.: escalando uma
+# posicao aos poucos). 1 = so a primeira compra em cada mercado e copiada.
+MAX_POSITIONS_PER_MARKET = 1
+
 # ---------------------------------------------------------------------------
 # FILTRO DE CARTEIRAS (WALLET RANKING)
 # ---------------------------------------------------------------------------

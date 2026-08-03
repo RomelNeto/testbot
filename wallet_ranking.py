@@ -8,6 +8,12 @@ FIXES v2:
   Agora: win rate = wins / (wins + losses) — ignora posicoes com pnl==0.
 - Adiciona campo "win_rate_display" para debug (wins/losses/empates visiveis)
 - Guarda amostra de posicao em _debug para facilitar diagnostico
+
+FIX v4:
+- O arquivo de debug so era escrito "se nao existir" -- como o projeto ja
+  entregava um arquivo placeholder, ele nunca era substituido pela amostra
+  real. Agora sobrescreve sempre que encontra uma posicao de verdade (com
+  campos alem da nota inicial), garantindo que reflita a API de verdade.
 """
 from __future__ import annotations
 
@@ -54,6 +60,18 @@ def _first_present(d: dict, keys: list[str], default=None):
     return default
 
 
+def _save_debug_sample(position: dict) -> None:
+    """FIX v4: sempre sobrescreve com uma amostra real (nao so na primeira
+    vez), para o arquivo nunca ficar preso no placeholder inicial."""
+    os.makedirs(config.DATA_DIR, exist_ok=True)
+    debug_path = os.path.join(config.DATA_DIR, "_debug_sample_position.json")
+    try:
+        with open(debug_path, "w") as f:
+            json.dump(position, f, indent=2)
+    except Exception:
+        pass  # debug e best-effort, nunca deve quebrar o ranking
+
+
 def _compute_metrics(wallet_address: str, trades: list[dict],
                       positions: list[dict]) -> WalletMetrics:
     """
@@ -82,13 +100,8 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
     losses = 0
     pnl_zero = 0  # posicoes com pnl=0 (provavelmente nao resolvidas ainda)
 
-    # Guarda amostra para debug na primeira execucao real
     if positions:
-        os.makedirs(config.DATA_DIR, exist_ok=True)
-        debug_path = os.path.join(config.DATA_DIR, "_debug_sample_position.json")
-        if not os.path.exists(debug_path):
-            with open(debug_path, "w") as f:
-                json.dump(positions[0], f, indent=2)
+        _save_debug_sample(positions[0])
 
     for p in positions:
         # Aceita varios nomes de campo possiveis para "posicao resolvida"
