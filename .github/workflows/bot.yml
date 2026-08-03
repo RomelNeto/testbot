@@ -6,6 +6,16 @@ on:
     - cron: "0 3 * * 1"      # redescoberta toda segunda às 3h UTC
     - cron: "0 8 * * *"      # relatório diário às 9h Portugal
   workflow_dispatch:
+    inputs:
+      command:
+        description: "Comando manual (deixa 'cycle' para o funcionamento normal; escolhe 'reset' para limpar a simulação, ex.: depois de um bug corrigido)"
+        required: false
+        default: "cycle"
+        type: choice
+        options:
+          - cycle
+          - reset
+          - discover
 
 permissions:
   contents: write
@@ -30,6 +40,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Bootstrap automático (se não há carteiras qualificadas)
+        if: github.event.inputs.command != 'reset'
         run: |
           NEEDS=false
           if [ ! -f "data/qualified_wallets.json" ]; then
@@ -55,8 +66,11 @@ jobs:
           python main.py discover
           python main.py rank
 
-      - name: Ciclo de monitoramento
-        run: python main.py cycle
+      - name: Executar comando (ciclo normal, ou reset/discover manual)
+        run: |
+          CMD="${{ github.event.inputs.command || 'cycle' }}"
+          echo "A executar: python main.py $CMD"
+          python main.py "$CMD"
 
       - name: Salvar estado
         run: |
