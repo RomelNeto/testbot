@@ -114,7 +114,17 @@ def _try_close_via_source_wallet_positions(state: SimulationState, position_key:
     source_wallet = pos["source_wallet"]
     market_id = pos["market_id"]
 
-    if source_wallet not in positions_cache:
+    # FIX v5, tentativa 1: lookup direto por condition_id -- mais confiavel
+    # para carteiras muito ativas, onde a lista completa de posicoes (sem
+    # filtro) pode nao trazer a posicao especifica que procuramos.
+    source_position = None
+    try:
+        source_position = pm.get_position_for_market(source_wallet, market_id)
+    except Exception as exc:
+        print(f"  [erro] lookup direto de posicao falhou para "
+              f"{source_wallet[:12]}.../{market_id[:16]}...: {exc}")
+
+    if source_position is None and source_wallet not in positions_cache:
         try:
             raw_positions = pm.get_positions_for_user(source_wallet)
         except Exception as exc:
@@ -127,7 +137,9 @@ def _try_close_via_source_wallet_positions(state: SimulationState, position_key:
                 lookup[key] = p
         positions_cache[source_wallet] = lookup
 
-    source_position = positions_cache[source_wallet].get(market_id)
+    if source_position is None:
+        source_position = positions_cache.get(source_wallet, {}).get(market_id)
+
     if not source_position:
         return False  # a carteira de origem nao tem (ou nao achamos) essa posicao
 

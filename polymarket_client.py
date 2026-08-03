@@ -158,6 +158,32 @@ def get_positions_for_user(wallet_address: str) -> list[dict]:
     return result if isinstance(result, list) else []
 
 
+def get_position_for_market(wallet_address: str, condition_id: str) -> Optional[dict]:
+    """
+    FIX v5: busca a posicao de UMA carteira num UM mercado especifico,
+    usando o filtro por condition_id que a Data API documenta suportar em
+    /positions (junto com "redeemability", "size" etc).
+
+    Por que isso importa: get_positions_for_user() sem filtro retorna a
+    lista de posicoes da carteira sem paginacao explicita -- para carteiras
+    muito ativas (milhares de posicoes), a posicao especifica que estamos
+    procurando pode nao vir na resposta. Filtrando direto por condition_id
+    evitamos depender de "a posicao certa estar na primeira pagina".
+
+    Tenta 3 nomes de parametro possiveis (a documentacao nao deixa 100%
+    claro qual e o nome exato aceito) antes de desistir.
+    """
+    for param_name in ("market", "conditionId", "condition_id"):
+        try:
+            result = _get(f"{config.DATA_API_BASE}/positions",
+                          params={"user": wallet_address, param_name: condition_id})
+            if isinstance(result, list) and result:
+                return result[0]
+        except Exception:
+            continue
+    return None
+
+
 def get_recent_trades_feed(limit: int = 500, offset: int = 0,
                             min_cash_amount: Optional[float] = None) -> list[dict]:
     params: dict = {"limit": limit, "offset": offset, "takerOnly": "true"}
