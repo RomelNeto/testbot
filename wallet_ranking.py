@@ -38,6 +38,12 @@ class WalletMetrics:
     total_volume_usd: float
     qualifies: bool
     reason: str
+    # NOVO (FIX v7): win rate calculado so com os trades resolvidos mais
+    # recentes (config.RECENT_TRADES_WINDOW), para detectar carteiras que
+    # "esfriaram" mais rapido do que o historico completo mostraria.
+    win_rate_recent: float = 0.0
+    recent_sample_size: int = 0
+    used_recent_window: bool = False
 
 
 def _load_candidate_wallets(path: str = config.WATCHLIST_FILE) -> list[str]:
@@ -99,6 +105,7 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
     wins = 0
     losses = 0
     pnl_zero = 0  # posicoes com pnl=0 (provavelmente nao resolvidas ainda)
+    resolved_records = []  # (end_date_str_ou_None, outcome_won) -- para o calculo recente
 
     if positions:
         _save_debug_sample(positions[0])
@@ -153,11 +160,35 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
         else:
             losses += 1
 
+        end_date = _first_present(p, ["endDate", "end_date", "endDateIso"], None)
+        resolved_records.append((end_date, outcome_won))
+
     # FIX: denominador = wins + losses (ignora pnl~0)
     denominator = wins + losses
     win_rate = (wins / denominator) if denominator > 0 else 0.0
 
     total_trades = len(trades)
+
+    # NOVO (FIX v7): win rate RECENTE -- pega so os N trades resolvidos mais
+    # recentes (ordenado por endDate, mais novo primeiro; registros sem data
+    # ficam por ultimo, tratados como mais antigos). Uma carteira que "esfriou"
+    # aparece aqui antes de o historico completo refletir isso.
+    def _sort_key(record):
+        end_date = record[0]
+        return end_date if end_date else ""  # strings vazias ordenam por ultimo (mais antigas)
+
+    sorted_records = sorted(resolved_records, key=_sort_key, reverse=True)
+    recent_records = sorted_records[:config.RECENT_TRADES_WINDOW]
+    recent_wins = sum(1 for _, won in recent_records if won)
+    recent_losses = sum(1 for _, won in recent_records if not won)
+    recent_sample_size = recent_wins + recent_losses
+    win_rate_recent = (recent_wins / recent_sample_size) if recent_sample_size > 0 else 0.0
+
+    # So usa o win rate recente para qualificar se houver amostra suficiente
+    # (config.MIN_RECENT_SAMPLE) -- caso contrario, uma amostra recente
+    # pequena e so ruido, e o historico completo e mais confiavel.
+    used_recent_window = recent_sample_size >= config.MIN_RECENT_SAMPLE
+    effective_win_rate = win_rate_recent if used_recent_window else win_rate
 
     qualifies = True
     reasons = []
@@ -167,10 +198,13 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
     if denominator == 0:
         qualifies = False
         reasons.append("sem trades resolvidos com PnL claro para validar performance")
-    elif win_rate < config.MIN_WIN_RATE:
+    elif effective_win_rate < config.MIN_WIN_RATE:
         qualifies = False
-        reasons.append(f"win rate {win_rate:.0%} abaixo do minimo {config.MIN_WIN_RATE:.0%} "
-                       f"({wins}W/{losses}L, {pnl_zero} neutros ignorados)")
+        janela = (f"ultimos {recent_sample_size} trades" if used_recent_window
+                   else f"historico completo, {recent_sample_size} recentes insuficientes")
+        reasons.append(f"win rate {effective_win_rate:.0%} ({janela}) abaixo do minimo "
+                       f"{config.MIN_WIN_RATE:.0%} ({wins}W/{losses}L geral, "
+                       f"{pnl_zero} neutros ignorados)")
 
     reason = "OK" if qualifies else "; ".join(reasons)
 
@@ -184,6 +218,9 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
         total_volume_usd=round(total_volume, 2),
         qualifies=qualifies,
         reason=reason,
+        win_rate_recent=win_rate_recent,
+        recent_sample_size=recent_sample_size,
+        used_recent_window=used_recent_window,
     )
 
 
@@ -196,9 +233,12 @@ def build_qualified_wallet_list(save: bool = True) -> list[WalletMetrics]:
         positions = pm.get_positions_for_user(wallet)
         metrics = _compute_metrics(wallet, trades, positions)
         results.append(metrics)
+        janela_info = (f"recente({metrics.recent_sample_size})={metrics.win_rate_recent:.0%}"
+                       if metrics.used_recent_window else "recente=amostra insuficiente")
         print(f"    trades={metrics.total_trades} resolved={metrics.resolved_trades} "
               f"wins={metrics.wins} losses={metrics.losses} "
-              f"win_rate={metrics.win_rate:.0%} qualifies={metrics.qualifies}")
+              f"win_rate_geral={metrics.win_rate:.0%} {janela_info} "
+              f"qualifies={metrics.qualifies}")
 
     if save:
         os.makedirs(config.DATA_DIR, exist_ok=True)

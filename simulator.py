@@ -79,13 +79,16 @@ class SimulationState:
     def count_open_positions_for_market(self, market_id: str) -> int:
         return sum(1 for p in self.open_positions.values() if p.get("market_id") == market_id)
 
+    def count_open_positions_for_event(self, event_key: str) -> int:
+        return sum(1 for p in self.open_positions.values() if p.get("event_key") == event_key)
+
 
 def _append_trade_log(row: dict) -> None:
     os.makedirs(config.DATA_DIR, exist_ok=True)
     file_exists = os.path.exists(config.TRADE_LOG_FILE)
     fieldnames = [
         "timestamp", "action", "source_wallet", "market_id", "market_question",
-        "outcome", "side", "entry_price", "size_usd", "proceeds_usd",
+        "outcome", "side", "entry_price", "size_usd", "fee_usd", "proceeds_usd",
         "pnl_usd", "reason",
     ]
     with open(config.TRADE_LOG_FILE, "a", newline="") as f:
@@ -119,25 +122,47 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
         return False  # preco invalido para um mercado binario (0-1)
 
     # NOVO: limite de exposicao por mercado -- impede que varias compras da
-    # mesma carteira no mesmo evento (ex.: escalando uma posicao aos poucos)
-    # sejam todas copiadas, concentrando capital demais num unico evento.
+    # mesma carteira no mesmo mercado (ex.: escalando uma posicao aos poucos)
+    # sejam todas copiadas, concentrando capital demais num unico mercado.
     if market_id and state.count_open_positions_for_market(market_id) >= config.MAX_POSITIONS_PER_MARKET:
+        return False
+
+    # NOVO: limite de exposicao por EVENTO real (eventSlug/eventId). Um mesmo
+    # jogo/eleicao pode ter varios mercados diferentes (ex.: "BO3 winner" e
+    # "Game 2 winner" da mesma partida) -- copiar todos e exposicao
+    # correlacionada disfarcada de diversificacao, entao limitamos por evento,
+    # nao so por mercado individual.
+    event_key = source_trade.get("eventSlug") or source_trade.get("eventId") or source_trade.get("eventID")
+    if event_key and state.count_open_positions_for_event(event_key) >= config.MAX_POSITIONS_PER_EVENT:
         return False
 
     size_usd = round(config.SIMULATED_CAPITAL_USD * config.POSITION_SIZE_PCT, 2)
     if size_usd > state.cash_balance:
         return False  # sem saldo fictício suficiente
 
+    # NOVO: custos de execucao (taxa + slippage), para a simulacao nao ficar
+    # otimista demais em relacao ao que aconteceria com dinheiro real.
+    # Slippage: o preco efetivo de entrada e um pouco pior que o preco visto
+    # no trade original (ha atraso entre a carteira de origem negociar e o
+    # bot detectar). Taxa: reduz quanto do valor investido vira acoes de
+    # verdade -- o resto e custo de execucao, nao gera retorno.
+    effective_entry_price = round(min(entry_price * (1 + config.SLIPPAGE_PCT), 0.99), 4)
+    fee_usd = round(size_usd * config.TAKER_FEE_PCT, 2)
+    net_invested_usd = round(size_usd - fee_usd, 2)
+
     position_key = f"{market_id}:{outcome}:{trade_id}"
     state.open_positions[position_key] = {
         "source_wallet": source_wallet,
         "market_id": market_id,
+        "event_key": event_key,
         "market_question": source_trade.get("title") or source_trade.get("question", ""),
         "outcome": outcome,
         "outcome_index": outcome_index,
         "side": side,
-        "entry_price": entry_price,
+        "entry_price": effective_entry_price,
         "size_usd": size_usd,
+        "fee_usd": fee_usd,
+        "net_invested_usd": net_invested_usd,
         "opened_at": _now_iso(),
     }
     if trade_id:
@@ -152,9 +177,12 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
         "market_question": state.open_positions[position_key]["market_question"],
         "outcome": outcome,
         "side": side,
-        "entry_price": entry_price,
+        "entry_price": effective_entry_price,
         "size_usd": size_usd,
-        "reason": "copiado da carteira qualificada",
+        "fee_usd": fee_usd,
+        "reason": "copiado da carteira qualificada (preco original "
+                  f"{entry_price}, com slippage {config.SLIPPAGE_PCT:.0%} "
+                  f"e taxa {config.TAKER_FEE_PCT:.0%})",
     })
     return True
 
@@ -170,7 +198,12 @@ def close_position(state: SimulationState, position_key: str, resolution_price: 
     if pos is None:
         return
 
-    shares = pos["size_usd"] / pos["entry_price"] if pos["entry_price"] else 0
+    # NOVO: usa o valor liquido (ja descontada a taxa de entrada) para
+    # calcular quantas "acoes" a posicao realmente comprou. O PnL final
+    # continua sendo medido contra o size_usd BRUTO (o que saiu do bolso),
+    # entao a taxa aparece corretamente como um custo a mais no resultado.
+    net_invested = pos.get("net_invested_usd", pos["size_usd"])
+    shares = net_invested / pos["entry_price"] if pos["entry_price"] else 0
     proceeds_usd = round(shares * resolution_price, 2)
     pnl_usd = round(proceeds_usd - pos["size_usd"], 2)
 
