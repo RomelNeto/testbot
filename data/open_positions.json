@@ -73,5 +73,35 @@
     "net_invested_usd": 24.5,
     "estimated_close_date": "2026-08-04",
     "opened_at": "2026-08-04T06:25:30.966452+00:00"
+  },
+  "0x010522f1f7e0cb638c6e07559441188f1b5e714455643db498c92f5d3197f9ee:No:0xc2a964013891e3e1718a96a9465e2d7f3f74860135bf70ef77491135cd216e24": {
+    "source_wallet": "0x06dc51826bc524d9a83770e7de9dd7e005b04524",
+    "market_id": "0x010522f1f7e0cb638c6e07559441188f1b5e714455643db498c92f5d3197f9ee",
+    "event_key": "bitcoin-above-on-august-4-2026",
+    "market_question": "Will the price of Bitcoin be above $64,000 on August 4?",
+    "outcome": "No",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.808,
+    "size_usd": 25.0,
+    "fee_usd": 0.5,
+    "net_invested_usd": 24.5,
+    "estimated_close_date": "2026-08-04",
+    "opened_at": "2026-08-04T09:20:06.563954+00:00"
+  },
+  "0x1aa7ade5533c0fdbee8621fa8cd7c4c7ab76c40f0d42b183cf6e5aa0c8ff0de7:No:0x895f372c9e00efc61ba777f38f7413cfc5f0dc4bfd93d37a9b5d7f8986c62471": {
+    "source_wallet": "0x06dc51826bc524d9a83770e7de9dd7e005b04524",
+    "market_id": "0x1aa7ade5533c0fdbee8621fa8cd7c4c7ab76c40f0d42b183cf6e5aa0c8ff0de7",
+    "event_key": "what-price-will-bitcoin-hit-on-august-4",
+    "market_question": "Will Bitcoin reach $65,000 on August 4?",
+    "outcome": "No",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.909,
+    "size_usd": 25.0,
+    "fee_usd": 0.5,
+    "net_invested_usd": 24.5,
+    "estimated_close_date": "2026-08-05",
+    "opened_at": "2026-08-04T09:20:06.997225+00:00"
   }
 }
