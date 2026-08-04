@@ -24,6 +24,13 @@ class PolymarketClientError(Exception):
     pass
 
 
+def _first_present(d: dict, keys: list[str], default=None):
+    for k in keys:
+        if k in d and d[k] is not None:
+            return d[k]
+    return default
+
+
 def _get(url: str, params: Optional[dict] = None, retries: int = 3) -> Any:
     last_err = None
     for attempt in range(retries):
@@ -184,13 +191,39 @@ def get_position_for_market(wallet_address: str, condition_id: str) -> Optional[
 
     Tenta 3 nomes de parametro possiveis (a documentacao nao deixa 100%
     claro qual e o nome exato aceito) antes de desistir.
+
+    BUG REAL CORRIGIDO (caso Aston Villa, confirmado pelo utilizador): esta
+    funcao aceitava `result[0]` cegamente, sem conferir se essa posicao
+    devolvida era mesmo do `condition_id` pedido. Ja tinhamos confirmado
+    que a Gamma API ignora silenciosamente parametros de filtro que nao
+    reconhece e devolve uma resposta "padrao" em vez de vazio/erro -- a
+    Data API pode fazer o mesmo em /positions. Nesse caso, `result[0]` vira
+    a PRIMEIRA posicao da carteira (sem filtro nenhum), nao a do mercado
+    pedido. Como esta funcao e chamada uma vez por posicao aberta a cada
+    ciclo, isso fazia TODAS as posicoes abertas da MESMA carteira no MESMO
+    ciclo lerem essa mesma posicao errada -- exatamente o padrao observado
+    (varios mercados completamente diferentes fechados com o MESMO
+    resultado no mesmo ciclo, incluindo "Will Aston Villa win?" marcado
+    como derrota quando a Aston Villa ganhou 3-1 de verdade).
     """
     for param_name in ("market", "conditionId", "condition_id"):
         try:
             result = _get(f"{config.DATA_API_BASE}/positions",
                           params={"user": wallet_address, param_name: condition_id})
             if isinstance(result, list) and result:
-                return result[0]
+                match = next(
+                    (p for p in result
+                     if _first_present(p, ["conditionId", "condition_id", "market"]) == condition_id),
+                    None,
+                )
+                if match:
+                    return match
+                # A resposta nao continha a posicao pedida -- ou o parametro
+                # nao filtrou de verdade (devolveu outra coisa sem querer) ou
+                # a carteira nao tem essa posicao mesmo. De qualquer forma,
+                # NUNCA aceitamos result[0] as cegas -- tenta o proximo nome
+                # de parametro, e se nenhum bater, cai no fallback (lista
+                # completa de posicoes, filtrada localmente em main.py).
         except Exception:
             continue
     return None
