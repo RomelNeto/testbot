@@ -94,7 +94,8 @@ def cmd_reset() -> None:
 
 
 def _try_close_via_source_wallet_positions(state: SimulationState, position_key: str,
-                                            pos: dict, positions_cache: dict) -> bool:
+                                            pos: dict, positions_cache: dict,
+                                            verbose: bool = False) -> bool:
     """
     FIX v4 -- estratégia PRIMÁRIA de fechamento.
 
@@ -150,12 +151,19 @@ def _try_close_via_source_wallet_positions(state: SimulationState, position_key:
         source_position = positions_cache.get(source_wallet, {}).get(market_id)
 
     if not source_position:
+        if verbose:
+            print(f"    [posicoes] carteira {source_wallet[:12]}... nao tem (ou nao "
+                  f"achamos) a posicao no mercado {market_id[:16]}... -- pode ja ter "
+                  f"resgatado/vendido, ou nunca teve")
         return False  # a carteira de origem nao tem (ou nao achamos) essa posicao
 
     is_resolved = bool(_first_present(
         source_position, ["redeemable", "resolved", "closed", "isResolved"], False
     ))
     if not is_resolved:
+        if verbose:
+            print(f"    [posicoes] posicao encontrada em {market_id[:16]}... mas "
+                  f"ainda nao marcada como resolvida (redeemable={source_position.get('redeemable')})")
         return False  # ainda ativa, segundo a propria carteira copiada
 
     resolution_price = None
@@ -188,6 +196,9 @@ def _try_close_via_source_wallet_positions(state: SimulationState, position_key:
                 pass
 
     if resolution_price is None:
+        if verbose:
+            print(f"    [posicoes] posicao em {market_id[:16]}... marcada como resolvida "
+                  f"mas sem curPrice/PnL conclusivo (curPrice={source_position.get('curPrice')})")
         return False  # marcado como resolvido mas sem sinal conclusivo -- deixa outras estrategias tentarem
 
     print(f"  [{resultado} via /positions da carteira de origem] "
@@ -197,18 +208,31 @@ def _try_close_via_source_wallet_positions(state: SimulationState, position_key:
     return True
 
 
-def _try_close_via_gamma_api(state: SimulationState, position_key: str, pos: dict) -> bool:
-    """Estratégia SECUNDÁRIA (fallback): pergunta à Gamma API pelo mercado
-    diretamente. Mantida como reforço, caso a carteira de origem já tenha
-    fechado/resgatado a posição dela e não apareça mais em /positions."""
+def _try_close_via_gamma_api(state: SimulationState, position_key: str, pos: dict,
+                              verbose: bool = False) -> bool:
+    """
+    NOVO: promovida de fallback secundario para fonte CO-IGUAL/preferencial.
+
+    Por que a mudanca: a posicao da carteira de origem em /positions pode
+    simplesmente DESAPARECER se ela ja resgatou (redeem) o resultado --
+    nesse caso a estrategia via /positions nunca vai ter dados para
+    trabalhar, para sempre. Ja a Gamma API descreve o MERCADO em si (nao a
+    carteira): uma vez resolvido, o campo "closed" e o "outcomePrices"
+    final ficam registados permanentemente, independente do que qualquer
+    carteira especifica faca com a posicao dela. E a fonte mais duravel
+    disponivel -- por isso tentamos ela primeiro agora.
+    """
     market_id = pos["market_id"]
     try:
         market = pm.get_market_by_condition_id(market_id)
     except Exception as exc:
-        print(f"  [erro] ao consultar {market_id[:16]}...: {exc}")
+        if verbose:
+            print(f"    [gamma] erro ao consultar {market_id[:16]}...: {exc}")
         return False
 
     if not market:
+        if verbose:
+            print(f"    [gamma] mercado {market_id[:16]}... nao encontrado na Gamma API")
         return False
 
     is_closed = (
@@ -217,6 +241,9 @@ def _try_close_via_gamma_api(state: SimulationState, position_key: str, pos: dic
         or str(market.get("closed", "")).lower() == "true"
     )
     if not is_closed:
+        if verbose:
+            print(f"    [gamma] mercado {market_id[:16]}... encontrado mas ainda "
+                  f"active={market.get('active')} closed={market.get('closed')}")
         return False
 
     outcomes = market.get("outcomes") or []
@@ -246,6 +273,9 @@ def _try_close_via_gamma_api(state: SimulationState, position_key: str, pos: dic
                 resolution_price = None
 
     if resolution_price is None:
+        if verbose:
+            print(f"    [gamma] mercado {market_id[:16]}... fechado mas sem "
+                  f"outcomePrices conclusivo (outcomes={outcomes})")
         return False
 
     resultado = "GANHOU ✓" if resolution_price >= 0.99 else "PERDEU ✗"
@@ -255,11 +285,24 @@ def _try_close_via_gamma_api(state: SimulationState, position_key: str, pos: dic
     return True
 
 
+# NOVO: se uma posicao ja esta aberta ha mais tempo que isto sem nenhuma
+# estrategia conseguir resolve-la, passamos a imprimir diagnostico detalhado
+# de cada tentativa -- para uma posicao recem-aberta isso so faria ruido nos
+# logs (o mercado provavelmente ainda nem terminou de verdade), mas para uma
+# que ja devia ter resolvido ha muito, o diagnostico ajuda a perceber
+# exatamente em qual fonte/campo a informacao esta a faltar.
+VERBOSE_DIAGNOSTIC_AGE_HOURS = 2
+
+
 def _check_open_position_resolutions(state: SimulationState) -> None:
     """
     Para cada posição aberta, tenta fechar em 3 estratégias, em ordem:
-      1. /positions da carteira de origem (mais confiável, já comprovada)
-      2. Gamma API por conditionId (fallback secundário)
+      1. Gamma API por conditionId -- descreve o MERCADO, nao a carteira;
+         uma vez resolvido, fica disponivel para sempre, mesmo que a
+         carteira copiada ja tenha resgatado/vendido a posicao dela (o que
+         faria ela desaparecer do /positions).
+      2. /positions da carteira de origem -- reforço/atalho, ainda util
+         quando a carteira ainda detem a posicao.
       3. Timeout por idade (rede de segurança final, marca como perdida)
     """
     now = datetime.now(timezone.utc)
@@ -269,10 +312,23 @@ def _check_open_position_resolutions(state: SimulationState) -> None:
     for position_key in list(state.open_positions.keys()):
         pos = state.open_positions[position_key]
 
-        if _try_close_via_source_wallet_positions(state, position_key, pos, positions_cache):
+        age_hours = None
+        opened_at_str_check = pos.get("opened_at", "")
+        if opened_at_str_check:
+            try:
+                age_hours = (now - datetime.fromisoformat(opened_at_str_check)).total_seconds() / 3600
+            except ValueError:
+                pass
+        verbose = age_hours is not None and age_hours >= VERBOSE_DIAGNOSTIC_AGE_HOURS
+        if verbose:
+            print(f"  [diagnostico] {pos['market_question'][:55]}... aberta há "
+                  f"{age_hours:.1f}h sem resolver -- a detalhar cada tentativa:")
+
+        if _try_close_via_gamma_api(state, position_key, pos, verbose=verbose):
             continue
 
-        if _try_close_via_gamma_api(state, position_key, pos):
+        if _try_close_via_source_wallet_positions(state, position_key, pos, positions_cache,
+                                                    verbose=verbose):
             continue
 
         opened_at_str = pos.get("opened_at", "")
