@@ -19,12 +19,34 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 import os
 from dataclasses import dataclass, asdict
 from typing import Optional
 
 import config
 import polymarket_client as pm
+
+
+def _wilson_lower_bound(wins: int, n: int, z: float = 1.96) -> float:
+    """
+    Limite inferior do intervalo de confianca de Wilson para uma proporcao
+    (aqui, o win rate). Ao contrario do win rate bruto, isto penaliza
+    automaticamente amostras pequenas: uma carteira com 6W/1L (85.7% bruto,
+    so 7 resolvidos) tem um limite inferior bem mais baixo do que uma com
+    68W/20L (77.3% bruto, 88 resolvidos) -- reflete que a segunda amostra e
+    muito mais confiavel, mesmo tendo um win rate bruto menor.
+
+    z=1.96 corresponde a 95% de confianca (config.WILSON_CONFIDENCE_Z).
+    """
+    if n <= 0:
+        return 0.0
+    phat = wins / n
+    z2 = z * z
+    denom = 1 + z2 / n
+    center = phat + z2 / (2 * n)
+    margin = z * math.sqrt((phat * (1 - phat) / n) + (z2 / (4 * n * n)))
+    return max(0.0, (center - margin) / denom)
 
 
 @dataclass
@@ -44,6 +66,10 @@ class WalletMetrics:
     win_rate_recent: float = 0.0
     recent_sample_size: int = 0
     used_recent_window: bool = False
+    # NOVO (FIX v8): limite inferior de confianca de Wilson sobre a amostra
+    # efetiva (recente, se usada; senao o historico completo). E este valor
+    # -- nao o win_rate/win_rate_recent bruto -- que decide a qualificacao.
+    win_rate_confidence_lower: float = 0.0
 
 
 def _load_candidate_wallets(path: str = config.WATCHLIST_FILE) -> list[str]:
@@ -190,20 +216,38 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
     used_recent_window = recent_sample_size >= config.MIN_RECENT_SAMPLE
     effective_win_rate = win_rate_recent if used_recent_window else win_rate
 
+    # NOVO (FIX v8) -- amostra efetiva usada para decidir a qualificacao:
+    # a janela recente se estiver em uso, senao o historico completo.
+    eff_wins, eff_n = (recent_wins, recent_sample_size) if used_recent_window else (wins, denominator)
+    win_rate_confidence_lower = _wilson_lower_bound(eff_wins, eff_n, z=config.WILSON_CONFIDENCE_Z)
+
     qualifies = True
     reasons = []
     if total_trades < config.MIN_TRADES_HISTORY:
         qualifies = False
-        reasons.append(f"apenas {total_trades} trades (minimo {config.MIN_TRADES_HISTORY})")
-    if denominator == 0:
+        reasons.append(f"apenas {total_trades} trades no total (minimo {config.MIN_TRADES_HISTORY})")
+
+    janela = f"ultimos {recent_sample_size} trades" if used_recent_window else "historico completo"
+
+    # BUG REAL CORRIGIDO: antes disto, o minimo de amostra so olhava para o
+    # total de trades (sempre alto para carteiras ativas), nao para quantos
+    # JA RESOLVERAM com resultado claro -- por isso uma carteira com so 8
+    # resolvidos (6W/1L) qualificava, e na pratica deu 0% de acerto ao ser
+    # copiada de verdade.
+    if eff_n < config.MIN_RESOLVED_TRADES:
         qualifies = False
-        reasons.append("sem trades resolvidos com PnL claro para validar performance")
-    elif effective_win_rate < config.MIN_WIN_RATE:
+        reasons.append(f"apenas {eff_n} trades resolvidos ({janela}, minimo "
+                       f"{config.MIN_RESOLVED_TRADES}) -- amostra pequena demais para "
+                       "confiar no win rate")
+    elif win_rate_confidence_lower < config.MIN_WIN_RATE:
         qualifies = False
-        janela = (f"ultimos {recent_sample_size} trades" if used_recent_window
-                   else f"historico completo, {recent_sample_size} recentes insuficientes")
-        reasons.append(f"win rate {effective_win_rate:.0%} ({janela}) abaixo do minimo "
-                       f"{config.MIN_WIN_RATE:.0%} ({wins}W/{losses}L geral, "
+        # NOVO: a decisao agora usa o limite inferior de Wilson, nao o win
+        # rate bruto -- por isso mostramos os dois no motivo, para ficar
+        # claro por que uma carteira com win rate bruto aparentemente bom
+        # (ex.: 85%) pode reprovar por ter amostra pequena demais.
+        reasons.append(f"limite de confianca (Wilson) {win_rate_confidence_lower:.0%} "
+                       f"abaixo do minimo {config.MIN_WIN_RATE:.0%} ({janela}, win rate "
+                       f"bruto {effective_win_rate:.0%}, {eff_wins}W/{eff_n - eff_wins}L, "
                        f"{pnl_zero} neutros ignorados)")
 
     reason = "OK" if qualifies else "; ".join(reasons)
@@ -215,6 +259,7 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
         wins=wins,
         losses=losses,
         win_rate=win_rate,
+        win_rate_confidence_lower=round(win_rate_confidence_lower, 4),
         total_volume_usd=round(total_volume, 2),
         qualifies=qualifies,
         reason=reason,
@@ -238,6 +283,7 @@ def build_qualified_wallet_list(save: bool = True) -> list[WalletMetrics]:
         print(f"    trades={metrics.total_trades} resolved={metrics.resolved_trades} "
               f"wins={metrics.wins} losses={metrics.losses} "
               f"win_rate_geral={metrics.win_rate:.0%} {janela_info} "
+              f"wilson_lower={metrics.win_rate_confidence_lower:.0%} "
               f"qualifies={metrics.qualifies}")
 
     if save:
