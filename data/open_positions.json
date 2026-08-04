@@ -1,49 +1,4 @@
 {
-  "0x08e3ce3e927c3cef14b2f0a12dce7d6b7a1e5a0e2ee1b7c3019eff063dde4e3f:Maya Joint:0x5f59bd0a25a5b1ff117054930f26b5ee509820c0f9967fe12d9db72ddfb96b2c": {
-    "source_wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
-    "market_id": "0x08e3ce3e927c3cef14b2f0a12dce7d6b7a1e5a0e2ee1b7c3019eff063dde4e3f",
-    "event_key": "wta-starodu-joint-2026-08-03",
-    "market_question": "National Bank Open: Yulia Starodubtseva vs Maya Joint",
-    "outcome": "Maya Joint",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.3133,
-    "size_usd": 25.0,
-    "fee_usd": 0.5,
-    "net_invested_usd": 24.5,
-    "estimated_close_date": "2026-08-10",
-    "opened_at": "2026-08-03T23:53:50.751361+00:00"
-  },
-  "0xec2f2278740a5f62a683ae6fe33960b8368e48bcbb66205987cda5ff09568da4:Taylor Townsend:0xec79236d74009be575b3e65041a41923cd13066e64f476e83fad57b2a4a3b86f": {
-    "source_wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
-    "market_id": "0xec2f2278740a5f62a683ae6fe33960b8368e48bcbb66205987cda5ff09568da4",
-    "event_key": "wta-valento-townsen-2026-08-03",
-    "market_question": "National Bank Open: Tereza Valentova vs Taylor Townsend",
-    "outcome": "Taylor Townsend",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.6363,
-    "size_usd": 25.0,
-    "fee_usd": 0.5,
-    "net_invested_usd": 24.5,
-    "estimated_close_date": "2026-08-10",
-    "opened_at": "2026-08-03T23:53:51.171249+00:00"
-  },
-  "0xd8734eebf786ba90492e0f8ab1be18bdba8ed2ee1ea8601a591adf17e7ee7575:Milwaukee Brewers:0xf49a78399191d76f8e4f87875fc5cf273e45514b7ef255641ee9b0c93b7a8f35": {
-    "source_wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
-    "market_id": "0xd8734eebf786ba90492e0f8ab1be18bdba8ed2ee1ea8601a591adf17e7ee7575",
-    "event_key": "mlb-pit-mil-2026-08-03",
-    "market_question": "Pittsburgh Pirates vs. Milwaukee Brewers",
-    "outcome": "Milwaukee Brewers",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.606,
-    "size_usd": 25.0,
-    "fee_usd": 0.5,
-    "net_invested_usd": 24.5,
-    "estimated_close_date": "2026-08-10",
-    "opened_at": "2026-08-03T23:53:51.958798+00:00"
-  },
   "0x0d553f94b651ac131cf69b59dc907adabdeaf49da410ac312ca195d7f1b75233:No:0xfed7e5fa4c1c285cc32f4407db5d6caa1e23e6329a62e78e640af75b097714fc": {
     "source_wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
     "market_id": "0x0d553f94b651ac131cf69b59dc907adabdeaf49da410ac312ca195d7f1b75233",
@@ -59,49 +14,19 @@
     "estimated_close_date": "2026-08-04",
     "opened_at": "2026-08-03T23:53:52.400979+00:00"
   },
-  "0xec5adee010a5f519c8a8387c1b00115ddb0ce60e0afc882c8e1d88d234ad5cc6:Rebecca Marino:0xbacb7d507cb95777e262799d178b7b1cad8155389e03d12d1755766421603497": {
+  "0x3a9ceb5d12c1472e339b64e90a2ba28de40ad4c0b1e6fa98a7ace289e6f061ab:Under:0xa230fbdfbf9d48d6f69ef6738f2f539953eb16eb6b08922fa7a533882fdce2a8": {
     "source_wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
-    "market_id": "0xec5adee010a5f519c8a8387c1b00115ddb0ce60e0afc882c8e1d88d234ad5cc6",
-    "event_key": "wta-marino-sonmez-2026-08-03",
-    "market_question": "National Bank Open: Rebecca Marino vs Zeynep Sonmez",
-    "outcome": "Rebecca Marino",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.3939,
-    "size_usd": 25.0,
-    "fee_usd": 0.5,
-    "net_invested_usd": 24.5,
-    "estimated_close_date": "2026-08-10",
-    "opened_at": "2026-08-03T23:53:53.100416+00:00"
-  },
-  "0x4be9801a77a99073a097a77c9c573ed3a804fab0e7906c47106cc217a52f9624:Over:0x42dcfeed0e2e70255d611a3b7e7e83d3274a2a1e738d95568c5a247a70b93348": {
-    "source_wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
-    "market_id": "0x4be9801a77a99073a097a77c9c573ed3a804fab0e7906c47106cc217a52f9624",
-    "event_key": "mlb-wsh-phi-2026-08-03",
-    "market_question": "Washington Nationals vs. Philadelphia Phillies: O/U 8.5",
-    "outcome": "Over",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.4343,
-    "size_usd": 25.0,
-    "fee_usd": 0.5,
-    "net_invested_usd": 24.5,
-    "estimated_close_date": "2026-08-03",
-    "opened_at": "2026-08-03T23:53:54.389314+00:00"
-  },
-  "0x8d328817a2a87e284c955660a07a86f13785b8ff06c1c55b8c65700567d16f6f:No:0x973fe0db42e837105c2c10d084dbdccabad1e51550cad46944a6ecdfe91caa25": {
-    "source_wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
-    "market_id": "0x8d328817a2a87e284c955660a07a86f13785b8ff06c1c55b8c65700567d16f6f",
-    "event_key": "arg-vel-ind-2026-08-03",
-    "market_question": "Will CA V\u00e9lez Sarsfield win on 2026-08-03?",
-    "outcome": "No",
+    "market_id": "0x3a9ceb5d12c1472e339b64e90a2ba28de40ad4c0b1e6fa98a7ace289e6f061ab",
+    "event_key": "mlb-sd-ari-2026-08-03",
+    "market_question": "San Diego Padres vs. Arizona Diamondbacks: O/U 7.5",
+    "outcome": "Under",
     "outcome_index": 1,
     "side": "BUY",
-    "entry_price": 0.1717,
+    "entry_price": 0.8282,
     "size_usd": 25.0,
     "fee_usd": 0.5,
     "net_invested_usd": 24.5,
-    "estimated_close_date": "2026-08-03",
-    "opened_at": "2026-08-03T23:53:55.064439+00:00"
+    "estimated_close_date": "2026-08-04",
+    "opened_at": "2026-08-04T03:47:36.246368+00:00"
   }
 }
