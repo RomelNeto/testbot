@@ -74,21 +74,6 @@
     "estimated_close_date": "2026-08-10",
     "opened_at": "2026-08-03T23:53:53.100416+00:00"
   },
-  "0xe0c2c8d905b2cc7a65dd19a0fffddce92a8e509d421308af218773eb831ae1f1:Under:0x554451ddc28a3203fa6a0c59347bbbdafbb17442e683c9d66aeb803fec877b7d": {
-    "source_wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
-    "market_id": "0xe0c2c8d905b2cc7a65dd19a0fffddce92a8e509d421308af218773eb831ae1f1",
-    "event_key": "arg-pla-tal-2026-08-03-more-markets",
-    "market_question": "CA Platense vs. CA Talleres: O/U 4.5",
-    "outcome": "Under",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.9171,
-    "size_usd": 25.0,
-    "fee_usd": 0.5,
-    "net_invested_usd": 24.5,
-    "estimated_close_date": "2026-08-03",
-    "opened_at": "2026-08-03T23:53:53.808407+00:00"
-  },
   "0x4be9801a77a99073a097a77c9c573ed3a804fab0e7906c47106cc217a52f9624:Over:0x42dcfeed0e2e70255d611a3b7e7e83d3274a2a1e738d95568c5a247a70b93348": {
     "source_wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
     "market_id": "0x4be9801a77a99073a097a77c9c573ed3a804fab0e7906c47106cc217a52f9624",
