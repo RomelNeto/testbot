@@ -103,5 +103,20 @@
     "net_invested_usd": 24.5,
     "estimated_close_date": "2026-08-05",
     "opened_at": "2026-08-04T09:20:06.997225+00:00"
+  },
+  "0x3e9e996123fd2f2b33b7b74380abf469817da6a886a45af610c715c1891f5f2a:Yes:0x7fb340ec455743575731e3d310aa292277e1df0ab1256260f713bc95b02bf6b1": {
+    "source_wallet": "0x06dc51826bc524d9a83770e7de9dd7e005b04524",
+    "market_id": "0x3e9e996123fd2f2b33b7b74380abf469817da6a886a45af610c715c1891f5f2a",
+    "event_key": "what-price-will-ethereum-hit-on-august-4",
+    "market_question": "Will Ethereum reach $1,900 on August 4?",
+    "outcome": "Yes",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.3232,
+    "size_usd": 25.0,
+    "fee_usd": 0.5,
+    "net_invested_usd": 24.5,
+    "estimated_close_date": "2026-08-05",
+    "opened_at": "2026-08-04T11:38:51.651621+00:00"
   }
 }
