@@ -113,12 +113,23 @@
   .wr-bar{height:4px;background:var(--surface2);border-radius:2px;margin-top:12px;overflow:hidden;}
   .wr-fill{height:100%;background:var(--green);border-radius:2px;}
   .wallet-footer{margin-top:8px;font-size:10.5px;color:var(--text2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;}
+  .wallet-copied{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,0.08);font-size:11px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
 
   .notice{background:var(--amber-dim);border:1px solid var(--amber);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--amber);margin-bottom:14px;line-height:1.6;}
   .error-box{background:var(--red-dim);border:1px solid var(--red);border-radius:var(--radius);padding:16px;font-size:13px;color:var(--red);text-align:center;}
   .loading-box{color:var(--text2);padding:32px 16px;text-align:center;font-family:var(--mono);font-size:12px;}
   .refresh-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-size:12px;font-family:var(--mono);padding:6px 12px;border-radius:var(--radius);cursor:pointer;}
   .refresh-btn:hover{border-color:var(--muted);color:var(--text);}
+
+  /* ─── FILTROS ────────────────────────────────────────────────────────── */
+  .filters{display:flex;gap:4px;flex-wrap:wrap;}
+  .filter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);
+    font-size:11px;font-family:var(--mono);padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .12s ease;}
+  .filter-btn:hover{border-color:var(--muted);color:var(--text);}
+  .filter-btn.active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+  .nicho-select{background:var(--surface2);border:1px solid var(--border);color:var(--text2);
+    font-size:11px;font-family:var(--mono);padding:4px 8px;border-radius:20px;cursor:pointer;max-width:190px;}
+  .nicho-select:focus{outline:none;border-color:var(--blue);}
   .footer{border-top:1px solid var(--border);padding:14px 32px;font-size:10.5px;color:var(--muted);
     font-family:var(--mono);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
   .auto-badge{font-size:10px;background:var(--green-dim);color:var(--green);border:1px solid var(--green);padding:2px 7px;border-radius:10px;white-space:nowrap;}
@@ -167,7 +178,16 @@
   <div class="section">
     <div class="section-header">
       <div class="section-title">Posições</div>
-      <div style="display:flex;gap:8px;align-items:center;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="filters" id="trade-filters">
+          <button class="filter-btn active" data-status="all">Todas</button>
+          <button class="filter-btn" data-status="open">Abertas</button>
+          <button class="filter-btn" data-status="win">Ganhas</button>
+          <button class="filter-btn" data-status="loss">Perdidas</button>
+        </div>
+        <select class="nicho-select" id="nicho-filter" title="Filtrar por categoria">
+          <option value="all">Todas as categorias</option>
+        </select>
         <div class="auto-badge">actualiza automaticamente</div>
         <div class="count-badge" id="trade-count">—</div>
       </div>
@@ -191,6 +211,7 @@
 
 <div class="footer">
   <span>polymarket-sim-bot · dados reais do repositório</span>
+  <span id="next-refresh" style="color:var(--muted)">—</span>
   <span id="last-update">—</span>
 </div>
 
@@ -204,6 +225,11 @@ const CAPITAL     = 1500;
 
 document.getElementById('kpi-capital-val').textContent = '$' + CAPITAL;
 
+// Estado dos filtros da secção "Posições"
+let tradeFilter = 'all'; // 'all' | 'open' | 'win' | 'loss'
+let nichoFilter = 'all'; // 'all' | um nicho (ex.: '₿ Cripto')
+let lastRows    = [];    // ultimas linhas do trade_log, p/ re-render com filtros
+
 // URLs raw do GitHub — lidas directamente pelo browser
 function rawUrl(path) {
   return `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/${path}`;
@@ -215,14 +241,42 @@ function bustCache(url) {
 }
 
 // ─── UTILITÁRIOS ──────────────────────────────────────────────────────────────
+// Parsing de CSV que respeita aspas: titulos de mercado podem conter virgulas
+// dentro de aspas (ex.: "Will Bitcoin reach $65,000 on August 4?"). O split
+// simples por ',' desalinhava todas as colunas dessas linhas, distorcendo o
+// P&L exibido. Aqui tratamos campos entre aspas (e aspas escapadas com "").
+function splitCSVLine(line) {
+  const out = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = false;
+      } else {
+        cur += ch;
+      }
+    } else if (ch === '"') {
+      inQ = true;
+    } else if (ch === ',') {
+      out.push(cur); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
 function parseCSV(text) {
-  const lines = text.trim().split('\n').filter(l => l.trim());
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
   if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map(h => h.trim().replace(/\r/g,''));
+  const headers = splitCSVLine(lines[0]).map(h => h.trim());
   return lines.slice(1).map(line => {
-    const vals = line.split(',');
+    const vals = splitCSVLine(line);
     const obj = {};
-    headers.forEach((h, i) => obj[h] = (vals[i] || '').trim().replace(/\r/g,''));
+    headers.forEach((h, i) => obj[h] = (vals[i] || '').trim());
     return obj;
   });
 }
@@ -325,7 +379,16 @@ function renderKPIs(rows) {
     if (p > 0) wins++;
   });
 
-  const openCount = opens.length - closes.length;
+  // Posições abertas = opens que não têm close correspondente (o close tem
+  // de ser POSTERIOR à abertura, para não confundir re-aberturas do mesmo
+  // mercado com o fecho de uma posição antiga).
+  const openCount = opens.filter(o => {
+    const oT = Date.parse(o.timestamp) || 0;
+    return !closes.some(cl =>
+      cl.market_id === o.market_id && cl.outcome === o.outcome &&
+      (Date.parse(cl.timestamp) || 0) >= oT
+    );
+  }).length;
   const wr = closes.length > 0 ? Math.round(wins / closes.length * 100) : null;
 
   // Saldo
@@ -359,17 +422,28 @@ function renderTrades(rows) {
   const opens  = rows.filter(r => r.action === 'OPEN');
   const closes = rows.filter(r => r.action === 'CLOSE');
 
-  // Mapeia opens com os closes correspondentes
+  // Mapeia opens com os closes correspondentes (só closes POSTERIORES à
+  // abertura — evita emparelhar com o fecho de uma posição antiga do mesmo
+  // mercado quando há re-aberturas).
   const positions = opens.map(o => {
+    const oT = Date.parse(o.timestamp) || 0;
     const c = closes.find(cl =>
-      cl.market_id === o.market_id && cl.outcome === o.outcome
+      cl.market_id === o.market_id && cl.outcome === o.outcome &&
+      (Date.parse(cl.timestamp) || 0) >= oT
     );
     const pnl    = c ? (parseFloat(c.pnl_usd) || 0) : null;
     const status = c ? (pnl >= 0 ? 'win' : 'loss') : 'open';
     return { ...o, closeRow: c || null, pnl, status };
   });
 
-  document.getElementById('trade-count').textContent = `${positions.length} trade${positions.length !== 1 ? 's' : ''}`;
+  // Aplica filtros de status e nicho (se activos)
+  const filtered = positions.filter(p => {
+    if (tradeFilter !== 'all' && p.status !== tradeFilter) return false;
+    if (nichoFilter !== 'all' && nicho(p.market_question) !== nichoFilter) return false;
+    return true;
+  });
+
+  document.getElementById('trade-count').textContent = `${filtered.length} trade${filtered.length !== 1 ? 's' : ''}`;
 
   const hasOldOpen = positions.some(p => p.status === 'open');
   document.getElementById('open-notice').style.display = hasOldOpen ? 'block' : 'none';
@@ -379,9 +453,14 @@ function renderTrades(rows) {
       '<div class="loading-box">Sem trades registados. O bot ainda não copiou nenhum trade.</div>';
     return;
   }
+  if (filtered.length === 0) {
+    document.getElementById('trades-container').innerHTML =
+      '<div class="loading-box">Sem trades para este filtro.</div>';
+    return;
+  }
 
   // Abertos primeiro, depois por data
-  const sorted = [...positions].sort((a, b) => {
+  const sorted = [...filtered].sort((a, b) => {
     if (a.status === 'open' && b.status !== 'open') return -1;
     if (a.status !== 'open' && b.status === 'open') return  1;
     return new Date(b.timestamp) - new Date(a.timestamp);
@@ -468,18 +547,36 @@ function renderTrades(rows) {
 }
 
 // ─── RENDER WALLETS ───────────────────────────────────────────────────────────
-function renderWallets(wallets) {
+function renderWallets(wallets, rows) {
   const qualified = wallets.filter(w => w.qualifies);
   if (qualified.length === 0) {
     document.getElementById('wallets-container').innerHTML =
       '<div class="loading-box">Nenhuma carteira qualificada ainda.</div>';
     return;
   }
+
+  // PnL REAL das carteiras já copiadas (derivado do trade_log, não do
+  // histórico da API) -- mostra quanto cada carteira rendeu de facto ao bot.
+  const copiedStats = {};
+  (rows || []).forEach(r => {
+    const w = r.source_wallet;
+    if (!w) return;
+    if (!copiedStats[w]) copiedStats[w] = { trades: 0, pnl: 0, wins: 0, losses: 0 };
+    if (r.action === 'CLOSE') {
+      const p = parseFloat(r.pnl_usd) || 0;
+      copiedStats[w].trades += 1;
+      copiedStats[w].pnl += p;
+      if (p > 0) copiedStats[w].wins += 1; else copiedStats[w].losses += 1;
+    }
+  });
+
   document.getElementById('wallets-container').innerHTML = qualified.map(w => {
     // NOVO: mostra tambem o limite inferior de confianca (Wilson), quando
     // presente no qualified_wallets.json -- e o numero que agora decide a
     // qualificacao, mais conservador que o win rate bruto exibido acima.
     const hasConfidence = typeof w.win_rate_confidence_lower === 'number';
+    const cs = copiedStats[w.wallet_address] || null;
+    const csColor = cs ? (cs.pnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--muted)';
     return `
     <div class="wallet-card">
       <div class="wallet-addr">${shortWallet(w.wallet_address)}</div>
@@ -493,6 +590,10 @@ function renderWallets(wallets) {
         <span>Vol: $${(w.total_volume_usd/1e6).toFixed(1)}M</span>
         ${hasConfidence ? `<span title="Limite inferior de confiança (Wilson) -- o que decide a qualificação">confiança: ${Math.round(w.win_rate_confidence_lower*100)}%</span>` : ''}
         <span style="color:var(--green)">✓ A ser copiada</span>
+      </div>
+      <div class="wallet-copied">
+        <span>Copiado: ${cs ? cs.trades + ' · ' + cs.wins + 'W / ' + cs.losses + 'L' : '—'}</span>
+        <span style="color:${csColor};font-weight:600">${cs ? fmt(cs.pnl) : ''}</span>
       </div>
     </div>`;
   }).join('');
@@ -515,14 +616,28 @@ async function loadData() {
 
     const csvText    = await csvResp.text();
     const rows       = parseCSV(csvText);
+    lastRows = rows;
     const walletsRaw = walletsResp.ok ? await walletsResp.json() : [];
+
+    // Preenche o select de categorias com os nichos presentes nos dados
+    const nichoSelect = document.getElementById('nicho-filter');
+    if (nichoSelect) {
+      const seen = new Set();
+      rows.forEach(r => seen.add(nicho(r.market_question)));
+      const current = nichoSelect.value;
+      nichoSelect.innerHTML = '<option value="all">Todas as categorias</option>' +
+        [...seen].sort().map(n => `<option value="${esc(n)}">${n}</option>`).join('');
+      nichoSelect.value = seen.has(current) ? current : 'all';
+      nichoFilter = nichoSelect.value;
+    }
 
     renderKPIs(rows);
     renderTrades(rows);
-    renderWallets(walletsRaw);
+    renderWallets(walletsRaw, rows);
 
     const now = new Date().toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'});
     document.getElementById('last-update').textContent = `actualizado às ${now}`;
+    refreshSeconds = REFRESH_INTERVAL_S;
     badge.className = 'badge badge-live';
     badge.textContent = 'SIMULAÇÃO ACTIVA';
 
@@ -538,6 +653,38 @@ async function loadData() {
       </div>`;
   }
 }
+
+// ─── FILTROS (eventos) ────────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    tradeFilter = btn.dataset.status || 'all';
+    renderTrades(lastRows);
+  });
+});
+
+const nichoSelectEl = document.getElementById('nicho-filter');
+if (nichoSelectEl) {
+  nichoSelectEl.addEventListener('change', () => {
+    nichoFilter = nichoSelectEl.value;
+    renderTrades(lastRows);
+  });
+}
+
+// ─── CONTAGEM REGRESSIVA ATÉ A PRÓXIMA ACTUALIZAÇÃO ───────────────────────────
+const REFRESH_INTERVAL_S = 5 * 60; // igual ao setInterval de recarga abaixo
+let refreshSeconds = REFRESH_INTERVAL_S;
+setInterval(() => {
+  refreshSeconds--;
+  if (refreshSeconds <= 0) refreshSeconds = REFRESH_INTERVAL_S;
+  const el = document.getElementById('next-refresh');
+  if (el) {
+    const m = Math.floor(refreshSeconds / 60);
+    const s = String(refreshSeconds % 60).padStart(2, '0');
+    el.textContent = `próxima actualização em ${m}:${s}`;
+  }
+}, 1000);
 
 // Carrega ao abrir e depois a cada 5 minutos
 loadData();
