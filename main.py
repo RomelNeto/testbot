@@ -218,6 +218,95 @@ def _try_close_via_source_wallet_positions(state: SimulationState, position_key:
     return True
 
 
+def _try_close_via_market_trades(state: SimulationState, position_key: str,
+                                  pos: dict, verbose: bool = False) -> bool:
+    """
+    FIX v9 -- estrategia de fechamento via trades do MERCADO (nova fonte
+    confiavel, validada com dados reais em 2026-08-05).
+
+    Contexto real (verificado):
+      - A carteira de origem normalmente resgata/vende a posicao assim que o
+        mercado resolve, entao ela SOME do /positions da carteira
+        (confirmado: 0/16 dos mercados abertos estavam nas posicoes atuais
+        da carteira, mesmo paginando 1000 posicoes).
+      - A Gamma API ignora TODOS os filtros por identificador (conditionId,
+        condition_ids, slug, title, id) e devolve sempre o mesmo mercado
+        'padrao' de maior volume (confirmado) -- por isso
+        get_market_by_condition_id nunca encontra o mercado certo.
+      - A fonte que FUNCIONA: /trades?market=<conditionId> filtra de verdade
+        os trades daquele mercado. Num mercado ja resolvido, o preco do
+        ultimo trade de cada outcome reflete o resultado final: o vencedor
+        negocia a ~1.0 e o perdedor a ~0.0. Mercados ainda abertos tem
+        precos intermediarios (nao chegam a 0.99), entao nao fecham por
+        engano.
+
+    Retorna True se a posicao foi fechada.
+    """
+    market_id = pos["market_id"]
+    our_outcome = pos.get("outcome")
+    our_index = pos.get("outcome_index")
+    try:
+        trades = pm.get_trades_for_market(market_id, limit=25)
+    except Exception as exc:
+        if verbose:
+            print(f"    [trades] erro ao buscar trades de {market_id[:16]}...: {exc}")
+        return False
+
+    if not trades:
+        if verbose:
+            print(f"    [trades] sem trades para {market_id[:16]}... -- mercado "
+                  f"sem atividade ou nao encontrado")
+        return False
+
+    # O endpoint devolve os trades mais recentes primeiro. Procuramos o
+    # outcome cujo preco ja chegou ao valor final (~1.0 = venceu).
+    winner = None
+    winner_index = None
+    for t in trades:
+        price = t.get("price")
+        if price is None:
+            continue
+        try:
+            price = float(price)
+        except (TypeError, ValueError):
+            continue
+        if price >= 0.99:
+            winner = t.get("outcome") or winner
+            idx = t.get("outcomeIndex")
+            if idx is not None:
+                try:
+                    winner_index = int(idx)
+                except (TypeError, ValueError):
+                    pass
+            break
+
+    if winner is None:
+        if verbose:
+            print(f"    [trades] {market_id[:16]}... sem outcome com preco >= 0.99 "
+                  f"-- mercado provavelmente ainda nao resolveu")
+        return False  # ainda nao resolvido / sem sinal conclusivo
+
+    # Decide o resultado da NOSSA aposta: por nome do outcome (ex.: "No",
+    # "Gabriela Ruse", "Over"), com fallback pelo indice.
+    our_won = False
+    if our_outcome:
+        our_won = str(our_outcome).strip().lower() == str(winner).strip().lower()
+    elif our_index is not None and winner_index is not None:
+        our_won = our_index == winner_index
+    else:
+        if verbose:
+            print(f"    [trades] {market_id[:16]}... sem como comparar o nosso "
+                  f"outcome ({our_outcome!r}) com o vencedor ({winner!r})")
+        return False
+
+    resolution_price = 1.0 if our_won else 0.0
+    resultado = "GANHOU ✓" if our_won else "PERDEU ✗"
+    print(f"  [{resultado} via trades do mercado] {pos['market_question'][:55]}...")
+    close_position(state, position_key, resolution_price,
+                   reason="resolvido (via trades do mercado)")
+    return True
+
+
 def _try_close_via_gamma_api(state: SimulationState, position_key: str, pos: dict,
                               verbose: bool = False) -> bool:
     """
@@ -353,18 +442,26 @@ def _check_open_position_resolutions(state: SimulationState) -> None:
                   f"{age_hours:.1f}h sem resolver -- a detalhar cada tentativa:")
 
         if is_stuck:
-            # posição já presa há tempo -- Gamma primeiro (mais provável de
-            # ter os dados, já que a carteira de origem pode ter resgatado)
+            # posição já presa há tempo -- a carteira de origem provavelmente
+            # já resgatou/vendeu (some do /positions), então a fonte mais
+            # confiável é a dos trades do MERCADO (válida sempre, pois o
+            # preço final do mercado resolve). Gamma ficou como último
+            # recurso (confirmado que ela ignora filtros por id).
+            if _try_close_via_market_trades(state, position_key, pos, verbose=verbose):
+                continue
+            if _try_close_via_source_wallet_positions(state, position_key, pos, positions_cache,
+                                                        verbose=verbose):
+                continue
             if _try_close_via_gamma_api(state, position_key, pos, verbose=verbose):
                 continue
+        else:
+            # posição jovem -- via rápida primeiro (/positions da carteira,
+            # que ainda deve ter os dados), depois trades do mercado (1
+            # chamada só), e só então a Gamma.
             if _try_close_via_source_wallet_positions(state, position_key, pos, positions_cache,
                                                         verbose=verbose):
                 continue
-        else:
-            # posição jovem -- via rápida primeiro (/positions), só paga o
-            # custo da Gamma (ate 4 estrategias em cascata) se precisar
-            if _try_close_via_source_wallet_positions(state, position_key, pos, positions_cache,
-                                                        verbose=verbose):
+            if _try_close_via_market_trades(state, position_key, pos, verbose=verbose):
                 continue
             if _try_close_via_gamma_api(state, position_key, pos, verbose=verbose):
                 continue

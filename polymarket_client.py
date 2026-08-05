@@ -237,3 +237,25 @@ def get_recent_trades_feed(limit: int = 500, offset: int = 0,
         params["filterAmount"] = min_cash_amount
     result = _get(f"{config.DATA_API_BASE}/trades", params=params)
     return result if isinstance(result, list) else []
+
+
+def get_trades_for_market(condition_id: str, limit: int = 25,
+                          offset: int = 0) -> list[dict]:
+    """
+    FIX v9 -- NOVA fonte confiavel de resolucao de mercado.
+
+    VERIFICADO com a API real (2026-08-05): em /trades, o parametro 'market'
+    FILTRA de verdade pelo conditionId (teste real: 10/10 trades retornados
+    pertenciam ao mercado pedido, com o preco final de cada outcome). Para
+    um mercado ja resolvido, o preco do ultimo trade de cada outcome reflete
+    o resultado (ex.: 'Yes' a 1.0/0.999 = venceu; 'No' a 0.0 = perdeu). E
+    essa a base para _try_close_via_market_trades em main.py.
+
+    NOTA: a Gamma API NAO serve para isto -- confirmado que ignora TODOS os
+    filtros por identificador (conditionId, condition_ids, slug, title, id)
+    e devolve o mesmo mercado 'padrao' de maior volume (bug ja documentado
+    em FIX v6). Por isso get_market_by_condition_id nunca acha o mercado.
+    """
+    params = {"market": condition_id, "limit": limit, "offset": offset}
+    result = _get(f"{config.DATA_API_BASE}/trades", params=params)
+    return result if isinstance(result, list) else []
