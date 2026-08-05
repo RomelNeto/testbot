@@ -48,6 +48,26 @@ MAX_POSITIONS_PER_EVENT = 1
 # o upside e minusculo para o risco de perder tudo. 0.90 = so copiamos
 # quando o trade tem odds minimas de ~1.11x ou mais.
 MAX_ENTRY_PRICE = 0.90
+
+# ---------------------------------------------------------------------------
+# REALISMO DE LATENCIA (FIX v10) -- simular o atraso real do copy trading
+# ---------------------------------------------------------------------------
+# O bot so ve os trades da carteira de origem DEPOIS que ela executou (o
+# ciclo roda a cada POLL_INTERVAL_SECONDS, e no GitHub Actions ainda ha o
+# atraso do agendamento). Para o teste de 1 mes nao ficar otimista, estas
+# opcoes penalizam/barram trades velhos:
+#
+# MAX_TRADE_AGE_MINUTES: ignora trades mais antigos que isto. Com polling de
+#   30 min, um trade com horas de idade e de um mercado que provavelmente
+#   ja resolveu -- copia-lo seria irreal (em real, a ordem seria rejeitada
+#   ou feita "em cima do fecho"). 0 = desliga o filtro.
+# SLIPPAGE_PER_AGE_HOUR: slippage EXTRA por hora de atraso do trade, somado
+#   ao SLIPPAGE_PCT base. Quanto mais velho o trade, pior o preco que
+#   conseguiriamos de verdade (o mercado ja moveu).
+# MAX_SLIPPAGE_PCT: teto do slippage total (base + por idade).
+MAX_TRADE_AGE_MINUTES = 30
+SLIPPAGE_PER_AGE_HOUR = 0.02
+MAX_SLIPPAGE_PCT = 0.10
 # ---------------------------------------------------------------------------
 # CUSTOS DE EXECUCAO (taxa + slippage)
 # ---------------------------------------------------------------------------

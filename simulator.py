@@ -18,6 +18,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+import time
 from datetime import datetime, timezone
 
 import config
@@ -26,6 +27,30 @@ import polymarket_client as pm
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _trade_age_hours(source_trade: dict) -> float:
+    """
+    Idade do trade em horas (0.0 se desconhecida/invalida). Aceita timestamp
+    unix em segundos (10 digitos), milissegundos (13 digitos) ou string ISO.
+    Usado para o filtro de idade e para o slippage por atraso (FIX v10).
+    """
+    ts = source_trade.get("timestamp")
+    if ts is None:
+        return 0.0
+    if isinstance(ts, str):
+        try:
+            ts = datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
+        except ValueError:
+            return 0.0
+    try:
+        ts = float(ts)
+    except (TypeError, ValueError):
+        return 0.0
+    if ts > 1e12:  # milissegundos -> segundos
+        ts /= 1000.0
+    age_s = max(0.0, time.time() - ts)
+    return age_s / 3600.0
 
 
 def _load_json(path: str, default):
@@ -157,6 +182,15 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
     if entry_price > config.MAX_ENTRY_PRICE:
         return False
 
+    # NOVO (FIX v10): filtro de idade -- ignora trades antigos. O bot ve os
+    # trades da carteira com atraso (polling de 30 min + agendamento do
+    # GitHub); um trade com muitas horas provavelmente e de um mercado que
+    # ja resolveu, entao copia-lo seria irreal (em real, a ordem nem
+    # preencheria). 0 desliga o filtro.
+    age_hours = _trade_age_hours(source_trade)
+    if config.MAX_TRADE_AGE_MINUTES > 0 and age_hours * 60 > config.MAX_TRADE_AGE_MINUTES:
+        return False
+
     # NOVO: limite de exposicao por mercado -- impede que varias compras da
     # mesma carteira no mesmo mercado (ex.: escalando uma posicao aos poucos)
     # sejam todas copiadas, concentrando capital demais num unico mercado.
@@ -176,13 +210,34 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
     if size_usd > state.cash_balance:
         return False  # sem saldo fictício suficiente
 
-    # NOVO: custos de execucao (taxa + slippage), para a simulacao nao ficar
-    # otimista demais em relacao ao que aconteceria com dinheiro real.
-    # Slippage: o preco efetivo de entrada e um pouco pior que o preco visto
-    # no trade original (ha atraso entre a carteira de origem negociar e o
-    # bot detectar). Taxa: reduz quanto do valor investido vira acoes de
+    # NOVO (FIX v10): checagem de mercado ativo -- so depois de passar pelos
+    # filtros baratos. Se o preco do ultimo trade do mercado ja chegou a
+    # ~1.0 (>=0.99), o mercado resolveu e nao deve ser copiado (em real, a
+    # ordem seria rejeitada). 1 chamada extra, apenas para trades que seriam
+    # copiados. Nota: so usamos o sinal ">=0.99" (nao <=0.01) para nao barrar
+    # mercados ativos com lado azarado barato (ex.: longshot a 0.01).
+    if market_id:
+        try:
+            recent = pm.get_trades_for_market(market_id, limit=10)
+        except Exception:
+            recent = []
+        for t in recent:
+            p = t.get("price")
+            try:
+                p = float(p)
+            except (TypeError, ValueError):
+                continue
+            if p >= 0.99:
+                return False  # mercado ja resolvido (algum lado venceu)
+
+    # NOVO (FIX v10): custos de execucao (taxa + slippage), com slippage POR
+    # ATRASO. Quanto mais velho o trade, pior o preco que conseguiriamos de
+    # verdade (base SLIPPAGE_PCT + SLIPPAGE_PER_AGE_HOUR por hora, com teto
+    # MAX_SLIPPAGE_PCT). Taxa: reduz quanto do valor investido vira acoes de
     # verdade -- o resto e custo de execucao, nao gera retorno.
-    effective_entry_price = round(min(entry_price * (1 + config.SLIPPAGE_PCT), 0.99), 4)
+    slippage_pct = min(config.SLIPPAGE_PCT + age_hours * config.SLIPPAGE_PER_AGE_HOUR,
+                       config.MAX_SLIPPAGE_PCT)
+    effective_entry_price = round(min(entry_price * (1 + slippage_pct), 0.99), 4)
     fee_usd = round(size_usd * config.TAKER_FEE_PCT, 2)
     net_invested_usd = round(size_usd - fee_usd, 2)
 
@@ -232,8 +287,9 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
         "size_usd": size_usd,
         "fee_usd": fee_usd,
         "reason": "copiado da carteira qualificada (preco original "
-                  f"{entry_price}, com slippage {config.SLIPPAGE_PCT:.0%} "
-                  f"e taxa {config.TAKER_FEE_PCT:.0%})",
+                  f"{entry_price}, com slippage {slippage_pct:.0%} "
+                  f"[{age_hours:.1f}h de atraso] e taxa "
+                  f"{config.TAKER_FEE_PCT:.0%})",
         "estimated_close_date": estimated_close_date or "",
     })
     return True
