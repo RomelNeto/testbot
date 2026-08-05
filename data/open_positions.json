@@ -358,20 +358,5 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-10",
     "opened_at": "2026-08-04T19:29:06.704440+00:00"
-  },
-  "0xa023bf0cfa8246e55c956d783dc93b1aa45eea2d70dd41fb50bb7e3fb88d50af:No:0x95ce763e0ad4030d983a35a409cd51677ce45a414d1fd412e76401a0f2184833": {
-    "source_wallet": "0x06dc51826bc524d9a83770e7de9dd7e005b04524",
-    "market_id": "0xa023bf0cfa8246e55c956d783dc93b1aa45eea2d70dd41fb50bb7e3fb88d50af",
-    "event_key": "solana-price-on-august-5-2026",
-    "market_question": "Will the price of Solana be between $60 and $70 on August 5?",
-    "outcome": "No",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.99,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-05",
-    "opened_at": "2026-08-04T19:29:07.046462+00:00"
   }
 }
