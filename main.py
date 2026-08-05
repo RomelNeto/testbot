@@ -296,13 +296,30 @@ VERBOSE_DIAGNOSTIC_AGE_HOURS = 2
 
 def _check_open_position_resolutions(state: SimulationState) -> None:
     """
-    Para cada posição aberta, tenta fechar em 3 estratégias, em ordem:
-      1. Gamma API por conditionId -- descreve o MERCADO, nao a carteira;
-         uma vez resolvido, fica disponivel para sempre, mesmo que a
-         carteira copiada ja tenha resgatado/vendido a posicao dela (o que
-         faria ela desaparecer do /positions).
-      2. /positions da carteira de origem -- reforço/atalho, ainda util
-         quando a carteira ainda detem a posicao.
+    Para cada posição aberta, tenta fechar em 3 estratégias.
+
+    FIX v7 -- BUG REAL CORRIGIDO (ciclos deixaram de fechar QUALQUER posição
+    depois da v6): promover a Gamma API para "primeira tentativa sempre"
+    multiplicou por ~25x (MAX_OPEN_POSITIONS) o volume de chamadas a Gamma
+    a cada ciclo -- cada posição passou a fazer ate 4 estrategias em
+    cascata (get_market_by_condition_id) mesmo quando a via rapida
+    (/positions da carteira) teria resolvido na hora. Isso e lento o
+    suficiente para o ciclo não terminar dentro do intervalo entre
+    execuções agendadas (POLL_INTERVAL/cron), o que faz o próximo cron
+    disparar por cima do anterior (não há "concurrency:" no workflow) --
+    de fora, isso aparenta "nada fecha nunca", porque execuções se
+    sobrepõem e nenhuma chega a terminar e fazer commit/push do resultado.
+
+    A ordem agora é ADAPTATIVA por idade da posição:
+      - Posição jovem (< VERBOSE_DIAGNOSTIC_AGE_HOURS): tenta primeiro
+        /positions da carteira de origem (rápido, e na maioria dos casos
+        ainda tem os dados, porque a carteira normalmente só resgata a
+        posição depois de um tempo). Só cai para a Gamma API se isso
+        falhar.
+      - Posição já "presa" há tempo (>= VERBOSE_DIAGNOSTIC_AGE_HOURS): aí
+        sim vale a pena pagar o custo extra da Gamma primeiro, porque é
+        exatamente o caso em que a carteira de origem já deve ter
+        resgatado e sumido do /positions.
       3. Timeout por idade (rede de segurança final, marca como perdida)
     """
     now = datetime.now(timezone.utc)
@@ -319,17 +336,28 @@ def _check_open_position_resolutions(state: SimulationState) -> None:
                 age_hours = (now - datetime.fromisoformat(opened_at_str_check)).total_seconds() / 3600
             except ValueError:
                 pass
-        verbose = age_hours is not None and age_hours >= VERBOSE_DIAGNOSTIC_AGE_HOURS
+        is_stuck = age_hours is not None and age_hours >= VERBOSE_DIAGNOSTIC_AGE_HOURS
+        verbose = is_stuck
         if verbose:
             print(f"  [diagnostico] {pos['market_question'][:55]}... aberta há "
                   f"{age_hours:.1f}h sem resolver -- a detalhar cada tentativa:")
 
-        if _try_close_via_gamma_api(state, position_key, pos, verbose=verbose):
-            continue
-
-        if _try_close_via_source_wallet_positions(state, position_key, pos, positions_cache,
-                                                    verbose=verbose):
-            continue
+        if is_stuck:
+            # posição já presa há tempo -- Gamma primeiro (mais provável de
+            # ter os dados, já que a carteira de origem pode ter resgatado)
+            if _try_close_via_gamma_api(state, position_key, pos, verbose=verbose):
+                continue
+            if _try_close_via_source_wallet_positions(state, position_key, pos, positions_cache,
+                                                        verbose=verbose):
+                continue
+        else:
+            # posição jovem -- via rápida primeiro (/positions), só paga o
+            # custo da Gamma (ate 4 estrategias em cascata) se precisar
+            if _try_close_via_source_wallet_positions(state, position_key, pos, positions_cache,
+                                                        verbose=verbose):
+                continue
+            if _try_close_via_gamma_api(state, position_key, pos, verbose=verbose):
+                continue
 
         opened_at_str = pos.get("opened_at", "")
         if opened_at_str:

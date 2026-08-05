@@ -20,9 +20,23 @@ on:
 permissions:
   contents: write
 
+# FIX v7 -- BUG REAL CORRIGIDO ("nenhuma posição fecha"): há 3 agendamentos
+# cron diferentes e nenhuma proteção contra execuções sobrepostas. Se um
+# ciclo demorar mais que o intervalo até o próximo trigger (ex.: mais lento
+# depois de mudanças no código, ou API do Polymarket mais lenta), o próximo
+# run começa por cima do anterior -- ambos leem/escrevem data/ ao mesmo
+# tempo, e normalmente só um consegue dar commit/push (o outro falha ou
+# sobrescreve). De fora isso parece "nada está a fechar", porque runs
+# nunca terminam de forma limpa. `concurrency` faz o próximo run esperar
+# o atual terminar em vez de correr em paralelo com ele.
+concurrency:
+  group: polymarket-sim-bot
+  cancel-in-progress: false
+
 jobs:
   bot:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
