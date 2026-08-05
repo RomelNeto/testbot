@@ -150,6 +150,13 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
     if entry_price <= 0 or entry_price >= 1:
         return False  # preco invalido para um mercado binario (0-1)
 
+    # NOVO: filtro de preco maximo. Copiar a 0.95-0.99 e quase sempre EV
+    # negativo -- com fee + slippage, uma entrada acima de ~0.98 perde
+    # dinheiro mesmo vencendo, e o upside e minusculo para o risco de
+    # perder tudo. So copiamos quando o trade tem odds minimas.
+    if entry_price > config.MAX_ENTRY_PRICE:
+        return False
+
     # NOVO: limite de exposicao por mercado -- impede que varias compras da
     # mesma carteira no mesmo mercado (ex.: escalando uma posicao aos poucos)
     # sejam todas copiadas, concentrando capital demais num unico mercado.

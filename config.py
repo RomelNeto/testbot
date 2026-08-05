@@ -41,7 +41,13 @@ MAX_POSITIONS_PER_MARKET = 1
 # verdade. 1 = so copia UM mercado por evento, mesmo que a carteira de origem
 # tenha apostado em varios mercados do mesmo jogo/eleicao/etc.
 MAX_POSITIONS_PER_EVENT = 1
-
+# Preco de entrada MAXIMO para copiar um trade. Comprar caro demais e
+# quase sempre EV negativo: com fee (TAKER_FEE_PCT) + slippage
+# (SLIPPAGE_PCT), uma entrada acima de ~0.98 perde dinheiro MESMO
+# vencendo (proceeds = net_invested/entry < size_usd), e mesmo a 0.95-0.99
+# o upside e minusculo para o risco de perder tudo. 0.90 = so copiamos
+# quando o trade tem odds minimas de ~1.11x ou mais.
+MAX_ENTRY_PRICE = 0.90
 # ---------------------------------------------------------------------------
 # CUSTOS DE EXECUCAO (taxa + slippage)
 # ---------------------------------------------------------------------------

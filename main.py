@@ -157,19 +157,23 @@ def _try_close_via_source_wallet_positions(state: SimulationState, position_key:
                   f"resgatado/vendido, ou nunca teve")
         return False  # a carteira de origem nao tem (ou nao achamos) essa posicao
 
-    is_resolved = bool(_first_present(
-        source_position, ["redeemable", "resolved", "closed", "isResolved"], False
-    ))
-    if not is_resolved:
-        if verbose:
-            print(f"    [posicoes] posicao encontrada em {market_id[:16]}... mas "
-                  f"ainda nao marcada como resolvida (redeemable={source_position.get('redeemable')})")
-        return False  # ainda ativa, segundo a propria carteira copiada
-
     resolution_price = None
     resultado = None
 
-    # FIX v6, sinal PRIMARIO: curPrice (preco atual/final da outcome).
+    # FIX v8 (bug real corrigido): o sinal "redeemable/resolved/closed" NAO
+    # serve como portao para detectar resolucao. Posicoes PERDEDORAS nunca
+    # ficam redeemable=True (nao ha o que resgatar on-chain), entao exigir
+    # esse flag antes de olhar o resultado bloqueava perdas reais de fechar
+    # -- ficavam presas para sempre, so saindo pelo timeout de 3 dias.
+    # O sinal confiavel e o curPrice (preco atual/final da outcome): ~1.0 =
+    # venceu, ~0.0 = perdeu, valido tanto para vitorias quanto derrotas,
+    # resgatadas ou nao (como o FIX v6 ja documentava). Por isso o curPrice
+    # passa a ser consultado PRIMEIRO, sem depender do flag de resolved.
+    # O flag continua apenas como pista auxiliar para o fallback de PnL.
+
+    # Sinal PRIMARIO: curPrice (preco atual/final da outcome). Posicoes
+    # ainda ABERTAS normalmente tem um preco intermediario (nao bate nos
+    # limites abaixo), entao nao fecham aqui.
     cur_price = _first_present(source_position, ["curPrice", "currentPrice", "price"], None)
     if cur_price is not None:
         try:
@@ -181,19 +185,25 @@ def _try_close_via_source_wallet_positions(state: SimulationState, position_key:
         except (TypeError, ValueError):
             pass
 
-    # Fallback secundario: sinal do PnL, so se curPrice nao foi conclusivo
-    # (ex.: ausente, ou um valor intermediario estranho).
+    # Fallback secundario: sinal do PnL. So usado se curPrice nao foi
+    # conclusivo (ausente ou intermediario) E a posicao vier marcada como
+    # resolvida pela API (redeemable/resolved/closed) -- ai sim o PnL e um
+    # reforco legitimo.
     if resolution_price is None:
-        pnl = _first_present(source_position, ["cashPnl", "realizedPnl", "pnl", "profit"], None)
-        if pnl is not None:
-            try:
-                pnl = float(pnl)
-                if pnl > 0.01:
-                    resolution_price, resultado = 1.0, "GANHOU ✓ (via PnL)"
-                elif pnl < -0.01:
-                    resolution_price, resultado = 0.0, "PERDEU ✗ (via PnL)"
-            except (TypeError, ValueError):
-                pass
+        is_resolved = bool(_first_present(
+            source_position, ["redeemable", "resolved", "closed", "isResolved"], False
+        ))
+        if is_resolved:
+            pnl = _first_present(source_position, ["cashPnl", "realizedPnl", "pnl", "profit"], None)
+            if pnl is not None:
+                try:
+                    pnl = float(pnl)
+                    if pnl > 0.01:
+                        resolution_price, resultado = 1.0, "GANHOU ✓ (via PnL)"
+                    elif pnl < -0.01:
+                        resolution_price, resultado = 0.0, "PERDEU ✗ (via PnL)"
+                except (TypeError, ValueError):
+                    pass
 
     if resolution_price is None:
         if verbose:
