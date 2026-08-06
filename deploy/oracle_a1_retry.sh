@@ -41,25 +41,35 @@ COMPARTMENT_OCID=$(oci iam compartment list --compartment-id-in-subtree true \
   --query "data[0].id" --raw-output)
 echo "    compartment: $COMPARTMENT_OCID"
 
-echo "==> A procurar imagem Ubuntu 22.04 (ARM) compatível com A1..."
+echo "==> A procurar imagem Ubuntu compatível com A1..."
+# 1) Ubuntu 22.04 exacto (com filtro de shape)
 IMAGE_OCID=$(oci compute image list --compartment-id "$COMPARTMENT_OCID" \
   --shape VM.Standard.A1.Flex \
   --operating-system "Canonical Ubuntu" \
   --operating-system-version "22.04" \
   --query "data[0].id" --raw-output 2>/dev/null)
+# 2) qualquer Ubuntu 22.04 (sem filtro de shape)
 if [ -z "$IMAGE_OCID" ] || [ "$IMAGE_OCID" = "null" ]; then
-  echo "    (--shape vazio; a tentar por nome 'aarch64'...)"
+  echo "    (a tentar qualquer Ubuntu 22.04...)"
   IMAGE_OCID=$(oci compute image list --compartment-id "$COMPARTMENT_OCID" \
     --operating-system "Canonical Ubuntu" \
     --operating-system-version "22.04" \
-    --query "data[?contains(ascii_downcase(\"display-name\"),'aarch64')].id | [0]" \
-    --raw-output 2>/dev/null)
+    --query "data[0].id" --raw-output 2>/dev/null)
+fi
+# 3) qualquer Ubuntu (para A1)
+if [ -z "$IMAGE_OCID" ] || [ "$IMAGE_OCID" = "null" ]; then
+  echo "    (a tentar qualquer Ubuntu para A1...)"
+  IMAGE_OCID=$(oci compute image list --compartment-id "$COMPARTMENT_OCID" \
+    --shape VM.Standard.A1.Flex \
+    --operating-system "Canonical Ubuntu" \
+    --query "data[0].id" --raw-output 2>/dev/null)
 fi
 if [ -z "$IMAGE_OCID" ] || [ "$IMAGE_OCID" = "null" ]; then
-  echo "ERRO: imagem Ubuntu 22.04 ARM não encontrada. Imagens Ubuntu 22.04 disponíveis:"
+  echo "ERRO: nenhuma imagem Ubuntu encontrada via CLI. Imagens Ubuntu disponíveis:"
   oci compute image list --compartment-id "$COMPARTMENT_OCID" \
-    --operating-system "Canonical Ubuntu" --operating-system-version "22.04" \
-    --query "data[].[\"display-name\",\"id\"]" --raw-output 2>/dev/null | head -30
+    --operating-system "Canonical Ubuntu" \
+    --query "data[].[\"display-name\",\"operating-system-version\",\"id\"]" \
+    --raw-output 2>/dev/null | head -40
   exit 1
 fi
 echo "    imagem: $IMAGE_OCID"
