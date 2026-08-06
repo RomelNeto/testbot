@@ -74,34 +74,49 @@
     "estimated_close_date": "2026-08-11",
     "opened_at": "2026-08-06T03:27:40.856312+00:00"
   },
-  "0x99ea48b4f88a19b7d995a744ceca7ef8d85c0604bb331f9d8f6a9d18b9cde773:Over:0x4178c9df1a76127d71dd418b1e7921001fb1d26255a92f9b6b6c15b029d79143": {
-    "source_wallet": "0xd1ed12197b7dc22dede923727e9b714024dbd7cb",
-    "market_id": "0x99ea48b4f88a19b7d995a744ceca7ef8d85c0604bb331f9d8f6a9d18b9cde773",
-    "event_key": "mlb-stl-nyy-2026-08-05",
-    "market_question": "St. Louis Cardinals vs. New York Yankees: O/U 7.5",
-    "outcome": "Over",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.071,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-05",
-    "opened_at": "2026-08-06T03:27:42.157243+00:00"
-  },
-  "0xfb9b2c569069e7e91f5633d0f4f1170e641db6797610c2ec6fa922b445c544d6:Detroit Tigers:0x20f09c311128a8e885023720da370882d12ced3caae52cafccbc59d3592add15": {
-    "source_wallet": "0xd1ed12197b7dc22dede923727e9b714024dbd7cb",
-    "market_id": "0xfb9b2c569069e7e91f5633d0f4f1170e641db6797610c2ec6fa922b445c544d6",
-    "event_key": "mlb-det-sea-2026-08-05",
-    "market_question": "Spread: Seattle Mariners (-1.5)",
-    "outcome": "Detroit Tigers",
+  "0x55b9dd040fd98f42a393f053c1eef66a0f6bff8f463011307c3b134c32cd05ca:No:0x0952a985afc39bd86c12dd85f9d7f8dcc7a4d2f9fc898bc5e844c4d4a92161ef": {
+    "source_wallet": "0x06dc51826bc524d9a83770e7de9dd7e005b04524",
+    "market_id": "0x55b9dd040fd98f42a393f053c1eef66a0f6bff8f463011307c3b134c32cd05ca",
+    "event_key": "bitcoin-above-on-august-8-2026",
+    "market_question": "Will the price of Bitcoin be above $64,000 on August 8?",
+    "outcome": "No",
     "outcome_index": 1,
     "side": "BUY",
-    "entry_price": 0.1827,
+    "entry_price": 0.2529,
     "size_usd": 15.0,
     "fee_usd": 0.3,
     "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-06",
-    "opened_at": "2026-08-06T03:27:42.817335+00:00"
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-06T06:11:22.922531+00:00"
+  },
+  "0xe9c3da8200ffb4d195582b7755218eb3220b550e9f0107b41419dd11b6a873c4:Yes:0x6edab6deafe72e0dd105890d0af8ac432b13bdc8b9db5a3b5d83af5423eb2b7d": {
+    "source_wallet": "0x06dc51826bc524d9a83770e7de9dd7e005b04524",
+    "market_id": "0xe9c3da8200ffb4d195582b7755218eb3220b550e9f0107b41419dd11b6a873c4",
+    "event_key": "bitcoin-price-on-august-8-2026",
+    "market_question": "Will the price of Bitcoin be between $62,000 and $64,000 on August 8?",
+    "outcome": "Yes",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.2326,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-06T06:11:23.439116+00:00"
+  },
+  "0xd30c7445c3f60984afd7e6c26074e1b47dc31e1bd3ebb8d706f69905ae24fd58:Yes:0xdfe310599a04ae287d9d98ffc1977ef866f8568e1730c7eef20422b2a6aa5793": {
+    "source_wallet": "0x06dc51826bc524d9a83770e7de9dd7e005b04524",
+    "market_id": "0xd30c7445c3f60984afd7e6c26074e1b47dc31e1bd3ebb8d706f69905ae24fd58",
+    "event_key": "what-price-will-bitcoin-hit-on-august-6",
+    "market_question": "Will Bitcoin reach $66,000 on August 6?",
+    "outcome": "Yes",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.183,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-07",
+    "opened_at": "2026-08-06T06:11:23.946809+00:00"
   }
 }
