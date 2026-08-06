@@ -81,6 +81,15 @@ MARKET_DECIDED_PRICE = 0.95
 # (resolvem antes de o bot agir, mesmo num VPS com polling rapido). Adicione
 # outras palavras-chave (minusculas) se quiser excluir mais categorias.
 EXCLUDED_MARKET_KEYWORDS = ["up or down"]
+
+# NOVO (FIX v14): fracao minima dos trades recentes da carteira que precisam
+# ser "copiaveis" pelo bot (outcome valido, sem keyword excluida, preco <=
+# MAX_ENTRY_PRICE). Elimina carteiras que qualificam pelo win rate mas sao
+# scalpers de mercados rapidos (ex.: "Up or Down" a 0.99) -- que o bot NAO
+# consegue seguir (verificado: carteira de 86% so opera "Up or Down", 0%
+# copiavel). 0.5 = pelo menos metade dos trades recentes tem que ser
+# copiaveis para a carteira qualificar.
+MIN_COPYABLE_RATIO = 0.5
 # ---------------------------------------------------------------------------
 # CUSTOS DE EXECUCAO (taxa + slippage)
 # ---------------------------------------------------------------------------

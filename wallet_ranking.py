@@ -71,6 +71,13 @@ class WalletMetrics:
     # efetiva (recente, se usada; senao o historico completo). E este valor
     # -- nao o win_rate/win_rate_recent bruto -- que decide a qualificacao.
     win_rate_confidence_lower: float = 0.0
+    # NOVO (FIX v14): copiabilidade + estimativa de EV (valor esperado).
+    # copyable_ratio = fracao dos trades recentes que o bot CONSEGUE copiar
+    # (outcome valido, sem keyword excluida, preco <= MAX_ENTRY_PRICE).
+    # ev_estimate = retorno medio por unidade apostada nos trades resolvidos
+    # (positivo = edge real, negativo = prejuizo esperado).
+    copyable_ratio: float = 0.0
+    ev_estimate: float = 0.0
 
 
 def _load_candidate_wallets(path: str = config.WATCHLIST_FILE) -> list[str]:
@@ -156,6 +163,30 @@ def _resolve_market_winner(condition_id: str, resolutions: dict,
     return winner
 
 
+def _is_copyable(trade: dict) -> bool:
+    """
+    FIX v14: um trade e "copiavel" se o bot CONSEGUE segui-lo de verdade
+    (mesmos guards da copia em simulator.maybe_copy_trade). Carteiras que
+    qualificam pelo win rate mas so operam mercados que o bot nao consegue
+    seguir (ex.: scalpers de "Up or Down" a 0.99) ficam com copyable_ratio
+    baixo e sao desqualificadas.
+    """
+    outcome = trade.get("outcome")
+    if not outcome or not str(outcome).strip():
+        return False  # parlay/multi-leg sem outcome
+    title = (trade.get("title") or trade.get("question") or "").lower()
+    for kw in config.EXCLUDED_MARKET_KEYWORDS:
+        if kw in title:
+            return False
+    try:
+        price = float(trade.get("price", 0) or 0)
+    except (TypeError, ValueError):
+        return False
+    if price <= 0 or price >= 1 or price > config.MAX_ENTRY_PRICE:
+        return False
+    return True
+
+
 def _compute_metrics(wallet_address: str, trades: list[dict],
                       resolutions: dict) -> WalletMetrics:
     """
@@ -189,11 +220,15 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
     # API baixo (resolve poucos mercados) e o win rate "de agora" relevante.
     window_trades = trades[:config.RANK_TRADES_WINDOW]
 
+    # FIX v14: quantos dos trades recentes o bot consegue copiar de verdade
+    copyable_count = sum(1 for t in window_trades if _is_copyable(t))
+
     resolved = 0
     wins = 0
     losses = 0
     pending = 0  # mercados ainda sem resolucao conclusiva
     resolved_records = []  # (timestamp_unix, outcome_won) para a janela recente
+    ev_records = []        # (entry_price, outcome_won) para o EV estimado
 
     # Agrupa por mercado para resolver cada um UMA vez (cache compartilhada).
     by_market: dict = {}
@@ -221,6 +256,24 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
             else:
                 losses += 1
             resolved_records.append((ts, outcome_won))
+            ev_records.append((_first_present(t, ["price"], 0), outcome_won))
+
+    copyable_ratio = (copyable_count / len(window_trades)) if window_trades else 0.0
+
+    # FIX v14: EV estimado por unidade apostada (payoff ~ (1-entry)/entry se
+    # ganhou, -1 se perdeu). Positivo = edge real; negativo = prejuizo.
+    ev_estimate = 0.0
+    if ev_records:
+        total = 0.0
+        for entry, won in ev_records:
+            try:
+                entry = float(entry)
+            except (TypeError, ValueError):
+                entry = 0.0
+            if entry <= 0:
+                entry = 0.5  # sem preco valido, assume neutro
+            total += ((1.0 - entry) / entry) if won else -1.0
+        ev_estimate = total / len(ev_records)
 
     denominator = wins + losses
     win_rate = (wins / denominator) if denominator > 0 else 0.0
@@ -246,6 +299,14 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
         qualifies = False
         reasons.append(f"apenas {total_trades} trades no total (minimo {config.MIN_TRADES_HISTORY})")
 
+    # FIX v14: se a maioria dos trades recentes nao e copiavel pelo bot, a
+    # carteira e um scalper de mercados rapidos -- o win rate dela nao vale
+    # para copy trading (o bot nao consegue seguir).
+    if copyable_ratio < config.MIN_COPYABLE_RATIO:
+        qualifies = False
+        reasons.append(f"apenas {copyable_ratio:.0%} dos trades recentes sao "
+                       "copiaveis pelo bot (muito scalping/mercados rapidos)")
+
     janela = f"ultimos {recent_sample_size} trades" if used_recent_window else "historico completo"
 
     if eff_n < config.MIN_RESOLVED_TRADES:
@@ -270,6 +331,8 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
         losses=losses,
         win_rate=win_rate,
         win_rate_confidence_lower=round(win_rate_confidence_lower, 4),
+        copyable_ratio=round(copyable_ratio, 4),
+        ev_estimate=round(ev_estimate, 4),
         total_volume_usd=round(total_volume, 2),
         qualifies=qualifies,
         reason=reason,
@@ -297,6 +360,7 @@ def build_qualified_wallet_list(save: bool = True) -> list[WalletMetrics]:
         print(f"    trades={metrics.total_trades} resolved={metrics.resolved_trades} "
               f"wins={metrics.wins} losses={metrics.losses} "
               f"win_rate_geral={metrics.win_rate:.0%} {janela_info} "
+              f"copiavel={metrics.copyable_ratio:.0%} ev={metrics.ev_estimate:+.2f} "
               f"wilson_lower={metrics.win_rate_confidence_lower:.0%} "
               f"qualifies={metrics.qualifies}")
 
