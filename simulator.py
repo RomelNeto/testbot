@@ -175,6 +175,14 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
     if entry_price <= 0 or entry_price >= 1:
         return False  # preco invalido para um mercado binario (0-1)
 
+    # NOVO (FIX v13): rejeita trades sem outcome usavel. Mercados parlay /
+    # multi-leg (ex.: "Game A AND Game B AND ...") vêm com outcome VAZIO na
+    # API -- o bot nao consegue acompanhar nem resolver (nao ha como saber
+    # se ganhou/perdeu; viraria perda por timeout de 3 dias). Melhor nao
+    # copiar do que travar capital numa posicao inacompanhavel.
+    if not outcome or not str(outcome).strip():
+        return False
+
     # NOVO: filtro de preco maximo. Copiar a 0.95-0.99 e quase sempre EV
     # negativo -- com fee + slippage, uma entrada acima de ~0.98 perde
     # dinheiro mesmo vencendo, e o upside e minusculo para o risco de
