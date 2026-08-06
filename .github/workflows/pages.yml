@@ -1,0 +1,50 @@
+# Deploy do dashboard (GitHub Pages) -- SO quando o index.html muda.
+#
+# POR QUE: o Pages automatico redeployava a CADA push no main (inclusive os
+# commits de dados do bot a cada 30 min), enchendo a fila de deploy e
+# deixando o site lento/preso. O dashboard busca os dados AO VIVO do
+# raw.githubusercontent.com, entao o HTML so precisa ser publicado quando
+# o proprio index.html muda.
+#
+# PARA USAR: em Settings -> Pages -> Build and deployment -> Source, escolha
+# "GitHub Actions" (em vez de "Deploy from a branch"). Este workflow passa a
+# ser o responsavel pelo deploy.
+name: Deploy dashboard to Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact (raiz do repo, so index.html interessa)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
