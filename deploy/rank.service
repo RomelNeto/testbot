@@ -1,0 +1,9 @@
+# Redescoberta + ranking semanal de carteiras (replica "0 3 * * 1").
+[Unit]
+Description=testbot - redescoberta e ranking semanal de carteiras
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/testbot
+ExecStart=/home/ubuntu/testbot/deploy/run_rank.sh

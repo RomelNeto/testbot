@@ -1,0 +1,28 @@
+# Systemd unit do bot (loop contínuo, polling rápido) para o VPS.
+# Instalar (o setup_vps.sh faz isto por ti):
+#   sudo cp deploy/testbot.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now testbot
+#
+# O serviço puxa o código novo (git pull) a cada restart, via
+# deploy/run_bot.sh, e reinicia sozinho se o bot cair.
+[Unit]
+Description=testbot - Polymarket copy-trading simulator (loop continuo)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/testbot
+# Polling rápido (30s). Para mudar: editar aqui e sudo systemctl restart testbot
+Environment=POLL_INTERVAL_SECONDS=30
+ExecStart=/home/ubuntu/testbot/deploy/run_bot.sh
+Restart=always
+RestartSec=15
+# Logs do bot (se crescerem muito, configura logrotate)
+StandardOutput=append:/home/ubuntu/testbot/logs/bot.log
+StandardError=append:/home/ubuntu/testbot/logs/bot.log
+
+[Install]
+WantedBy=multi-user.target

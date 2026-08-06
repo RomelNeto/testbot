@@ -1,0 +1,9 @@
+# Dispara deploy/sync_data.sh (push dos dados para o GitHub/dashboard).
+[Unit]
+Description=testbot - sincronizar dados para o GitHub (dashboard)
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/testbot
+ExecStart=/home/ubuntu/testbot/deploy/sync_data.sh

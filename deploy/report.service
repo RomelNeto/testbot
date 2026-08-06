@@ -1,0 +1,9 @@
+# Gera o relatório diário (replica o cron "0 8 * * *" do GitHub Actions).
+[Unit]
+Description=testbot - gerar relatorio diario
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/testbot
+ExecStart=/home/ubuntu/testbot/.venv/bin/python /home/ubuntu/testbot/report.py --days 1

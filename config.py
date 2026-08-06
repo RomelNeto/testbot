@@ -4,6 +4,7 @@ Configuracoes centrais do bot de simulacao (copy trading no Polymarket).
 Tudo que voce normalmente ajustaria durante o mes de teste fica aqui,
 para nao precisar mexer na logica do bot.
 """
+import os
 
 # ---------------------------------------------------------------------------
 # MODO DE OPERACAO
@@ -170,7 +171,11 @@ MAX_CONSECUTIVE_LOSSES_PER_WALLET = 3
 # ---------------------------------------------------------------------------
 # POLLING (com que frequencia o bot verifica novos trades das carteiras)
 # ---------------------------------------------------------------------------
-POLL_INTERVAL_SECONDS = 300  # 5 minutos
+# No GitHub Actions fica em 300 (5 min; e o cron que agenda). No VPS pode
+# baixar para 30-60s SEM editar o ficheiro, definindo a variavel de ambiente
+# POLL_INTERVAL_SECONDS (ex.: POLL_INTERVAL_SECONDS=45 python main.py run).
+# O systemd do VPS (deploy/testbot.service) faz isso por nos.
+POLL_INTERVAL_SECONDS = int(os.environ.get("POLL_INTERVAL_SECONDS", "300"))  # 5 minutos
 
 # ---------------------------------------------------------------------------
 # API (Polymarket - endpoints publicos, sem necessidade de autenticacao

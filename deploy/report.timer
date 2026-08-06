@@ -1,0 +1,10 @@
+# Relatório diário às 08:00 UTC.
+[Unit]
+Description=testbot - relatorio diario as 08:00 UTC
+
+[Timer]
+OnCalendar=*-*-* 08:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
