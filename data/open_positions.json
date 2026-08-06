@@ -29,19 +29,19 @@
     "estimated_close_date": "2026-08-06",
     "opened_at": "2026-08-06T15:40:19.854191+00:00"
   },
-  "0xc53908c9725eda4fd2d249fd5ae0cdca01a4929273da3a70fa4621e1614fa055:Ekaterina Alexandrova:0xa0d47a2aeea3f7290e2d7366e50a6c4c5db81eba6e96d6db44099dcb2c71d00d": {
-    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
-    "market_id": "0xc53908c9725eda4fd2d249fd5ae0cdca01a4929273da3a70fa4621e1614fa055",
-    "event_key": "wta-gibson-alexand-2026-08-05",
-    "market_question": "National Bank Open: Talia Gibson vs Ekaterina Alexandrova",
-    "outcome": "Ekaterina Alexandrova",
-    "outcome_index": 1,
+  "0x42fbb579bf53099fa5469349e094cfc27411c80dc1c1c337934f53290f26ad81:Juan Sebastian Osorio:0x30f500762b4cb73eaaeab15bccf7f6c89f86c6115b9312a8c4d243b3b4a6c856": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0x42fbb579bf53099fa5469349e094cfc27411c80dc1c1c337934f53290f26ad81",
+    "event_key": "itf-osorio-zeitune-2026-08-06",
+    "market_question": "ITF Londrina: Juan Sebastian Osorio vs Maximo Zeitune",
+    "outcome": "Juan Sebastian Osorio",
+    "outcome_index": 0,
     "side": "BUY",
-    "entry_price": 0.5267,
+    "entry_price": 0.0911,
     "size_usd": 15.0,
     "fee_usd": 0.3,
     "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-12",
-    "opened_at": "2026-08-06T15:40:20.772916+00:00"
+    "estimated_close_date": "2026-08-13",
+    "opened_at": "2026-08-06T22:17:19.780056+00:00"
   }
 }
