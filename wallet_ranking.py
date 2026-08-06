@@ -21,6 +21,7 @@ import csv
 import json
 import math
 import os
+import time
 from dataclasses import dataclass, asdict
 from typing import Optional
 
@@ -104,19 +105,73 @@ def _save_debug_sample(position: dict) -> None:
         pass  # debug e best-effort, nunca deve quebrar o ranking
 
 
-def _compute_metrics(wallet_address: str, trades: list[dict],
-                      positions: list[dict]) -> WalletMetrics:
+def _load_resolutions_cache() -> dict:
+    if not os.path.exists(config.MARKET_RESOLUTIONS_FILE):
+        return {}
+    try:
+        with open(config.MARKET_RESOLUTIONS_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_resolutions_cache(resolutions: dict) -> None:
+    try:
+        os.makedirs(config.DATA_DIR, exist_ok=True)
+        with open(config.MARKET_RESOLUTIONS_FILE, "w") as f:
+            json.dump(resolutions, f, indent=2)
+    except Exception:
+        pass  # cache e best-effort, nunca deve quebrar o ranking
+
+
+def _resolve_market_winner(condition_id: str, resolutions: dict,
+                            throttle: float = 0.0) -> Optional[str]:
     """
-    FIX v2: win rate calculado correctamente.
+    Descobre o outcome VENCEDOR de um mercado (para saber se cada trade da
+    carteira ganhou ou perdeu). Fonte: /trades?market=<conditionId> -- num
+    mercado ja resolvido, o preco do ultimo trade do vencedor e ~1.0
+    (verificado). Usa cache local para nao refazer chamadas, e uma pequena
+    pausa (throttle) para nao estourar o rate limit da API.
+    """
+    if condition_id in resolutions:
+        return resolutions[condition_id]
+    winner = None
+    try:
+        trades = pm.get_trades_for_market(condition_id, limit=25)
+        for t in trades:
+            p = t.get("price")
+            try:
+                p = float(p)
+            except (TypeError, ValueError):
+                continue
+            if p >= 0.99:
+                winner = t.get("outcome")
+                break
+    except Exception:
+        winner = None
+    if winner is not None:
+        resolutions[condition_id] = winner
+    if throttle > 0:
+        time.sleep(throttle)
+    return winner
 
-    O problema anterior: posicoes com pnl=0 eram ignoradas no count de
-    wins/losses mas o campo resolved_trades contava-as, fazendo o
-    win_rate = wins/resolved aparecer sempre baixo (0/96 = 0% mesmo
-    com carteiras lucrativas).
 
-    Correccao: win_rate = wins / (wins + losses), ignorando pnl==0.
-    Posicoes com pnl==0 sao tipicamente mercados resolvidos como N/A
-    ou posicoes ainda abertas que a API inclui na lista.
+def _compute_metrics(wallet_address: str, trades: list[dict],
+                      resolutions: dict) -> WalletMetrics:
+    """
+    FIX v11 -- win rate VERDADEIRO via historico de trades.
+
+    O calculo anterior usava /positions (o que a carteira AINDA tem). Isso e
+    viesado: vitorias sao resgatadas e somem do /positions, sobrando quase
+    so perdas (verificado com dados reais: 572/572 posicoes atuais da
+    carteira principal eram PERDAS, mas o historico real dela tinha ~77% de
+    acerto). Por isso o win rate "na foto atual" aparecia como 0%.
+
+    Agora calculamos pelo HISTORICO REAL de trades (/trades?user=): para
+    cada mercado em que a carteira negociou, descobrimos o vencedor (via
+    /trades?market=, com cache) e marcamos cada trade como GANHOU/PERDEU
+    conforme o outcome que ela apostou. Isso inclui as vitorias ja
+    resgatadas, dando um win rate fiel ao desempenho real.
     """
     total_volume = 0.0
     for t in trades:
@@ -127,97 +182,61 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
         except (TypeError, ValueError):
             pass
 
+    total_trades = len(trades)
+
+    # So usamos os RANK_TRADES_WINDOW trades mais recentes para o win rate
+    # (a API devolve do mais novo para o mais antigo) -- mantem o custo de
+    # API baixo (resolve poucos mercados) e o win rate "de agora" relevante.
+    window_trades = trades[:config.RANK_TRADES_WINDOW]
+
     resolved = 0
     wins = 0
     losses = 0
-    pnl_zero = 0  # posicoes com pnl=0 (provavelmente nao resolvidas ainda)
-    resolved_records = []  # (end_date_str_ou_None, outcome_won) -- para o calculo recente
+    pending = 0  # mercados ainda sem resolucao conclusiva
+    resolved_records = []  # (timestamp_unix, outcome_won) para a janela recente
 
-    if positions:
-        _save_debug_sample(positions[0])
-
-    for p in positions:
-        # Aceita varios nomes de campo possiveis para "posicao resolvida"
-        is_resolved = bool(_first_present(
-            p, ["redeemable", "resolved", "closed", "isResolved"], False
-        ))
-        if not is_resolved:
+    # Agrupa por mercado para resolver cada um UMA vez (cache compartilhada).
+    by_market: dict = {}
+    for t in window_trades:
+        cid = t.get("conditionId") or t.get("market")
+        if not cid:
             continue
+        by_market.setdefault(cid, []).append(t)
 
-        # FIX v6 -- correcao importante confirmada com dados reais:
-        # "realizedPnl" fica em 0 para posicoes PERDEDORAS (o resgate on-chain
-        # so acontece quando ha algo a resgatar; perdas nao precisam de
-        # "redeem", entao o campo nunca sai de 0). Usar so o sinal de
-        # realizedPnl fazia perdas reais serem contadas como "neutras" em vez
-        # de derrota, inflando o win rate. Agora usamos "curPrice" (preco
-        # final da outcome: ~1 = venceu, ~0 = perdeu) como sinal primario,
-        # com o PnL como reforco so quando curPrice nao for conclusivo.
-        outcome_won = None
-        cur_price = _first_present(p, ["curPrice", "currentPrice", "price"], None)
-        if cur_price is not None:
-            try:
-                cur_price = float(cur_price)
-                if cur_price >= 0.99:
-                    outcome_won = True
-                elif cur_price <= 0.01:
-                    outcome_won = False
-            except (TypeError, ValueError):
-                pass
-
-        if outcome_won is None:
-            pnl = _first_present(p, ["cashPnl", "realizedPnl", "pnl", "profit"], None)
-            if pnl is not None:
-                try:
-                    pnl = float(pnl)
-                    if pnl > 0.01:
-                        outcome_won = True
-                    elif pnl < -0.01:
-                        outcome_won = False
-                except (TypeError, ValueError):
-                    pass
-
-        if outcome_won is None:
-            pnl_zero += 1  # sem sinal conclusivo (nem curPrice nem PnL bateram) -- nao entra no calculo
+    for cid, tlist in by_market.items():
+        winner = _resolve_market_winner(cid, resolutions,
+                                        throttle=config.RANK_API_DELAY_SECONDS)
+        if winner is None:
+            pending += 1
             continue
+        for t in tlist:
+            traded_outcome = t.get("outcome")
+            ts = t.get("timestamp")
+            if traded_outcome is None:
+                continue
+            outcome_won = (str(traded_outcome).strip().lower() == str(winner).strip().lower())
+            resolved += 1
+            if outcome_won:
+                wins += 1
+            else:
+                losses += 1
+            resolved_records.append((ts, outcome_won))
 
-        resolved += 1
-        if outcome_won:
-            wins += 1
-        else:
-            losses += 1
-
-        end_date = _first_present(p, ["endDate", "end_date", "endDateIso"], None)
-        resolved_records.append((end_date, outcome_won))
-
-    # FIX: denominador = wins + losses (ignora pnl~0)
     denominator = wins + losses
     win_rate = (wins / denominator) if denominator > 0 else 0.0
 
-    total_trades = len(trades)
-
-    # NOVO (FIX v7): win rate RECENTE -- pega so os N trades resolvidos mais
-    # recentes (ordenado por endDate, mais novo primeiro; registros sem data
-    # ficam por ultimo, tratados como mais antigos). Uma carteira que "esfriou"
-    # aparece aqui antes de o historico completo refletir isso.
-    def _sort_key(record):
-        end_date = record[0]
-        return end_date if end_date else ""  # strings vazias ordenam por ultimo (mais antigas)
-
-    sorted_records = sorted(resolved_records, key=_sort_key, reverse=True)
+    # Janela recente pelos timestamps dos trades (mais novo primeiro).
+    sorted_records = sorted(resolved_records, key=lambda r: r[0] or 0, reverse=True)
     recent_records = sorted_records[:config.RECENT_TRADES_WINDOW]
     recent_wins = sum(1 for _, won in recent_records if won)
     recent_losses = sum(1 for _, won in recent_records if not won)
     recent_sample_size = recent_wins + recent_losses
     win_rate_recent = (recent_wins / recent_sample_size) if recent_sample_size > 0 else 0.0
 
-    # So usa o win rate recente para qualificar se houver amostra suficiente
-    # (config.MIN_RECENT_SAMPLE) -- caso contrario, uma amostra recente
-    # pequena e so ruido, e o historico completo e mais confiavel.
+    # So usa o win rate recente se houver amostra suficiente.
     used_recent_window = recent_sample_size >= config.MIN_RECENT_SAMPLE
     effective_win_rate = win_rate_recent if used_recent_window else win_rate
 
-    # NOVO (FIX v8) -- amostra efetiva usada para decidir a qualificacao:
-    # a janela recente se estiver em uso, senao o historico completo.
     eff_wins, eff_n = (recent_wins, recent_sample_size) if used_recent_window else (wins, denominator)
     win_rate_confidence_lower = _wilson_lower_bound(eff_wins, eff_n, z=config.WILSON_CONFIDENCE_Z)
 
@@ -229,11 +248,6 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
 
     janela = f"ultimos {recent_sample_size} trades" if used_recent_window else "historico completo"
 
-    # BUG REAL CORRIGIDO: antes disto, o minimo de amostra so olhava para o
-    # total de trades (sempre alto para carteiras ativas), nao para quantos
-    # JA RESOLVERAM com resultado claro -- por isso uma carteira com so 8
-    # resolvidos (6W/1L) qualificava, e na pratica deu 0% de acerto ao ser
-    # copiada de verdade.
     if eff_n < config.MIN_RESOLVED_TRADES:
         qualifies = False
         reasons.append(f"apenas {eff_n} trades resolvidos ({janela}, minimo "
@@ -241,14 +255,10 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
                        "confiar no win rate")
     elif win_rate_confidence_lower < config.MIN_WIN_RATE:
         qualifies = False
-        # NOVO: a decisao agora usa o limite inferior de Wilson, nao o win
-        # rate bruto -- por isso mostramos os dois no motivo, para ficar
-        # claro por que uma carteira com win rate bruto aparentemente bom
-        # (ex.: 85%) pode reprovar por ter amostra pequena demais.
         reasons.append(f"limite de confianca (Wilson) {win_rate_confidence_lower:.0%} "
                        f"abaixo do minimo {config.MIN_WIN_RATE:.0%} ({janela}, win rate "
                        f"bruto {effective_win_rate:.0%}, {eff_wins}W/{eff_n - eff_wins}L, "
-                       f"{pnl_zero} neutros ignorados)")
+                       f"{pending} mercados ainda sem resolucao)")
 
     reason = "OK" if qualifies else "; ".join(reasons)
 
@@ -271,12 +281,16 @@ def _compute_metrics(wallet_address: str, trades: list[dict],
 
 def build_qualified_wallet_list(save: bool = True) -> list[WalletMetrics]:
     candidates = _load_candidate_wallets()
+    resolutions = _load_resolutions_cache()
     results: list[WalletMetrics] = []
     for wallet in candidates:
         print(f"  avaliando {wallet[:12]}...")
-        trades = pm.get_all_trades_for_user(wallet)
-        positions = pm.get_positions_for_user(wallet)
-        metrics = _compute_metrics(wallet, trades, positions)
+        try:
+            trades = pm.get_all_trades_for_user(wallet)
+        except Exception as exc:
+            print(f"    [erro] ao buscar trades de {wallet[:12]}...: {exc}")
+            continue
+        metrics = _compute_metrics(wallet, trades, resolutions)
         results.append(metrics)
         janela_info = (f"recente({metrics.recent_sample_size})={metrics.win_rate_recent:.0%}"
                        if metrics.used_recent_window else "recente=amostra insuficiente")
@@ -287,6 +301,7 @@ def build_qualified_wallet_list(save: bool = True) -> list[WalletMetrics]:
               f"qualifies={metrics.qualifies}")
 
     if save:
+        _save_resolutions_cache(resolutions)
         os.makedirs(config.DATA_DIR, exist_ok=True)
         with open(config.QUALIFIED_WALLETS_FILE, "w") as f:
             json.dump([asdict(m) for m in results], f, indent=2)

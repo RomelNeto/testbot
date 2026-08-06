@@ -131,6 +131,16 @@ CATEGORY_FILTER = None
 RECENT_TRADES_WINDOW = 30
 MIN_RECENT_SAMPLE = 10
 
+# NOVO (FIX v11): quantos dos trades MAIS RECENTES da carteira usar para
+# calcular o win rate verdadeiro (via historico de trades + resolucao de cada
+# mercado). Quanto maior, mais preciso mas mais chamadas de API (uma por
+# mercado unico, com cache). 100-150 e um bom equilibrio.
+RANK_TRADES_WINDOW = 100
+
+# Pausa (segundos) entre chamadas de resolucao de mercado no ranking, para
+# nao estourar o rate limit da API do Polymarket.
+RANK_API_DELAY_SECONDS = 0.1
+
 # Depois de N perdas SEGUIDAS copiando uma carteira especifica, o bot para
 # de segui-la automaticamente ate revisao manual.
 MAX_CONSECUTIVE_LOSSES_PER_WALLET = 3
@@ -158,3 +168,8 @@ QUALIFIED_WALLETS_FILE = f"{DATA_DIR}/qualified_wallets.json"  # carteiras aprov
 TRADE_LOG_FILE = f"{DATA_DIR}/trade_log.csv"          # historico de trades simulados
 OPEN_POSITIONS_FILE = f"{DATA_DIR}/open_positions.json"
 SEEN_TRADES_FILE = f"{DATA_DIR}/seen_trade_ids.json"  # evita copiar o mesmo trade 2x
+
+# NOVO (FIX v11): cache de resolucoes de mercado (conditionId -> outcome
+# vencedor). Usado pelo ranking para calcular o win rate verdadeiro sem
+# refazer chamadas de API a cada execucao.
+MARKET_RESOLUTIONS_FILE = f"{DATA_DIR}/market_resolutions.json"

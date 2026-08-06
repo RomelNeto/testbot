@@ -7,6 +7,7 @@ Pode ser apagado depois de conferir que tudo funciona.
 """
 import os
 import random
+import time
 from unittest import mock
 
 import config
@@ -20,36 +21,49 @@ WALLET_B = "0xBBB0000000000000000000000000000000BBB0"
 WALLET_C = "0xCCC0000000000000000000000000000000CCC0"  # aparece pouco, nao deve qualificar como candidato
 
 
+def fake_market_winner(market_id):
+    """Vencedor determinístico por mercado: 'Yes' se o número final for par."""
+    try:
+        n = int(str(market_id).split("-")[-1])
+    except Exception:
+        n = 0
+    return "Yes" if n % 2 == 0 else "No"
+
+
 def fake_trades_for_user(wallet_address, limit=500, offset=0):
     if offset > 0:
         return []
     random.seed(hash(wallet_address) % 1000)
+    # Vies de acerto: WALLET_A acerta ~70% dos mercados, os demais ~30%.
+    bias = 0.7 if wallet_address == WALLET_A else 0.3
+    now = int(time.time())
     trades = []
     for i in range(120):
+        mid = f"market-{i % 15}"
+        winner = fake_market_winner(mid)
+        outcome = winner if random.random() < bias else ("No" if winner == "Yes" else "Yes")
         trades.append({
             "id": f"{wallet_address}-trade-{i}",
-            "conditionId": f"market-{i % 15}",
-            "outcome": "Yes" if i % 2 == 0 else "No",
+            "conditionId": mid,
+            "outcome": outcome,
             "side": "BUY",
             "price": round(random.uniform(0.2, 0.8), 2),
             "size": round(random.uniform(50, 500), 2),
+            "timestamp": now - i * 60,  # do mais novo ao mais antigo (como a API)
             "title": f"Mercado de teste {i % 15}",
         })
     return trades
 
 
-def fake_positions_for_user(wallet_address):
-    random.seed(hash(wallet_address) % 1000)
-    win_bias = 0.65 if wallet_address == WALLET_A else 0.3
-    positions = []
-    for i in range(110):
-        won = random.random() < win_bias
-        positions.append({
-            "market": f"market-{i % 15}",
-            "redeemable": True,
-            "realizedPnl": round(random.uniform(5, 50), 2) if won else -round(random.uniform(5, 50), 2),
-        })
-    return positions
+def fake_resolved_market(condition_id, limit=25, offset=0):
+    """Resolucao fake de um mercado (para o ranking): vencedor a preco 1.0."""
+    return [{"outcome": fake_market_winner(condition_id), "price": 1.0, "outcomeIndex": 0}]
+
+
+def fake_active_market(condition_id, limit=25, offset=0):
+    """Mercado AINDA ATIVO (para a copia): precos intermediarios."""
+    return [{"outcome": "Yes", "price": 0.5, "outcomeIndex": 0},
+            {"outcome": "No", "price": 0.5, "outcomeIndex": 1}]
 
 
 def fake_global_trades_feed(limit=500, offset=0, min_cash_amount=None):
@@ -82,27 +96,34 @@ def test_discovery():
 def test_ranking_and_cycle():
     print("=== Teste: ranking + ciclo de simulacao ===")
     with mock.patch.object(pm, "get_all_trades_for_user", side_effect=lambda w, **kw: fake_trades_for_user(w)), \
-         mock.patch.object(pm, "get_positions_for_user", side_effect=fake_positions_for_user):
+         mock.patch.object(pm, "get_trades_for_market", side_effect=lambda cid, **kw: fake_resolved_market(cid)):
         results = wallet_ranking.build_qualified_wallet_list()
 
     for r in results:
         print(f"{r.wallet_address}: win_rate={r.win_rate:.0%} qualifies={r.qualifies}")
 
     qualified = wallet_ranking.load_qualified_wallets()
-    assert WALLET_A in qualified
+    assert WALLET_A in qualified, "WALLET_A (70% de acerto) deveria qualificar"
+    assert WALLET_B not in qualified, "WALLET_B (30% de acerto) NAO deveria qualificar"
     print("OK: ranking funcionando.\n")
 
     print("=== Teste: main.run_single_cycle (modo cron/single-pass) ===")
     import main as bot_main
 
+    # Estado limpo em memoria (nao usar os dados reais do disco)
     state = SimulationState()
+    state.open_positions = {}
+    state.seen_trade_ids = []
+    state.consecutive_losses = {}
+    state.cash_balance = config.SIMULATED_CAPITAL_USD
+
     with mock.patch.object(pm, "get_trades_for_user", side_effect=lambda w, **kw: fake_trades_for_user(w)[:5]), \
-         mock.patch.object(pm, "get_all_markets", return_value=[]):
+         mock.patch.object(pm, "get_trades_for_market", side_effect=lambda cid, **kw: fake_active_market(cid)), \
+         mock.patch.object(pm, "get_position_for_market", return_value={}):
         bot_main.run_single_cycle(state, [WALLET_A])
 
     print(f"Posicoes abertas apos 1 ciclo: {len(state.open_positions)}")
     assert len(state.open_positions) > 0, "O ciclo unico deveria ter copiado ao menos 1 trade"
-    state.save()
     print("OK: modo cycle (single-pass, usado pelo GitHub Actions) funcionando.\n")
 
 
