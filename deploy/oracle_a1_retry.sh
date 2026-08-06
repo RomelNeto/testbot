@@ -48,15 +48,31 @@ if [ -z "$IGW_OCID" ] || [ "$IGW_OCID" = "null" ]; then
     --query "data.id" --raw-output)
 fi
 
-ROUTE_ID=$(oci network route-table list --compartment-id "$COMPARTMENT_OCID" \
-  --vcn-id "$VCN_OCID" --query "data[0].id" --raw-output)
+# Pequeno helper: espera o recurso existir (evita o "eventual consistency"
+# logo após criar a VCN, que fazia a subnet falhar com InvalidParameter).
+wait_for_id() {
+  local label="$1"; shift
+  local val=""
+  for _i in $(seq 1 12); do
+    val="$("$@" 2>/dev/null)"
+    [ -n "$val" ] && [ "$val" != "null" ] && { echo "$val"; return 0; }
+    sleep 5
+  done
+  echo "ERRO: não encontrei $label na VCN $VCN_OCID" >&2
+  return 1
+}
+
+ROUTE_ID=$(wait_for_id "route table" oci network route-table list \
+  --compartment-id "$COMPARTMENT_OCID" --vcn-id "$VCN_OCID" \
+  --query "data[0].id" --raw-output) || exit 1
 echo "==> A garantir rota 0.0.0.0/0 -> internet..."
 oci network route-table update --route-table-id "$ROUTE_ID" \
   --route-rules "[{\"cidrBlock\":\"0.0.0.0/0\",\"networkEntityId\":\"$IGW_OCID\"}]" \
   --force >/dev/null 2>&1 || echo "    (rota já configurada)"
 
-SEC_LIST_ID=$(oci network security-list list --compartment-id "$COMPARTMENT_OCID" \
-  --vcn-id "$VCN_OCID" --query "data[0].id" --raw-output)
+SEC_LIST_ID=$(wait_for_id "security list" oci network security-list list \
+  --compartment-id "$COMPARTMENT_OCID" --vcn-id "$VCN_OCID" \
+  --query "data[0].id" --raw-output) || exit 1
 echo "==> A garantir SSH (22) na security list..."
 oci network security-list update --security-list-id "$SEC_LIST_ID" \
   --ingress-security-rules '[{"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":22,"max":22}}}]' \
@@ -70,10 +86,15 @@ if [ -z "$SUBNET_OCID" ] || [ "$SUBNET_OCID" = "null" ]; then
   SUBNET_OCID=$(oci network subnet create --compartment-id "$COMPARTMENT_OCID" \
     --vcn-id "$VCN_OCID" --cidr-block "10.0.0.0/24" \
     --route-table-id "$ROUTE_ID" --security-list-ids "[\"$SEC_LIST_ID\"]" \
-    --display-name "subnet-testbot-public" --dns-label "public" \
-    --query "data.id" --raw-output)
+    --display-name "subnet-testbot-public" \
+    --query "data.id" --raw-output 2>&1) \
+    || { echo "    ERRO ao criar subnet (ver acima):"; exit 1; }
 fi
 echo "    subnet: $SUBNET_OCID"
+if [ -z "$SUBNET_OCID" ] || [ "$SUBNET_OCID" = "null" ]; then
+  echo "ERRO: subnet não criada. Vê o erro acima."
+  exit 1
+fi
 
 echo "==> A aguardar subnet ficar AVAILABLE..."
 for _i in $(seq 1 15); do
@@ -90,7 +111,19 @@ IMAGE_OCID=$(oci compute image list --compartment-id "$COMPARTMENT_OCID" \
   --operating-system-version "22.04" \
   --query "data[0].id" --raw-output 2>/dev/null)
 if [ -z "$IMAGE_OCID" ] || [ "$IMAGE_OCID" = "null" ]; then
-  echo "ERRO: imagem Ubuntu 22.04 não encontrada para A1."
+  echo "    (--shape vazio; a tentar por nome 'aarch64'...)"
+  IMAGE_OCID=$(oci compute image list --compartment-id "$COMPARTMENT_OCID" \
+    --operating-system "Canonical Ubuntu" \
+    --operating-system-version "22.04" \
+    --query "data[?contains(ascii_downcase(\"display-name\"),'aarch64')].id | [0]" \
+    --raw-output 2>/dev/null)
+fi
+if [ -z "$IMAGE_OCID" ] || [ "$IMAGE_OCID" = "null" ]; then
+  echo "ERRO: imagem Ubuntu 22.04 ARM não encontrada. Imagens Ubuntu 22.04 disponíveis:"
+  oci compute image list --compartment-id "$COMPARTMENT_OCID" \
+    --operating-system "Canonical Ubuntu" \
+    --operating-system-version "22.04" \
+    --query "data[].[\"display-name\",\"id\"]" --raw-output 2>/dev/null | head -30
   exit 1
 fi
 echo "    imagem: $IMAGE_OCID"
