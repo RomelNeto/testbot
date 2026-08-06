@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# VPS / logs
+logs/
+*.log
+
+# macOS
+.DS_Store
+
+# NOTA: data/ e reports/ estão INTENCIONALMENTE versionados -- o dashboard
+# (index.html) lê esses ficheiros do raw do GitHub, por isso têm de estar
+# no repositório (o bot faz commit automático deles).
