@@ -196,7 +196,7 @@
       ⚠️ Posições marcadas como <strong>ABERTO</strong> de eventos já terminados fecham automaticamente no próximo ciclo do bot (até 30 minutos).
     </div>
     <div class="trades-grid" id="trades-container">
-      <div class="loading-box">A carregar trades do GitHub...</div>
+      <div class="loading-box">A carregar trades do GitHub... (pode demorar alguns segundos)</div>
     </div>
   </div>
 
@@ -235,9 +235,25 @@ function rawUrl(path) {
   return `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/${path}`;
 }
 
-// Cache buster para forçar conteúdo fresco (GitHub tem cache de ~5 min)
+// Cache buster para forçar conteúdo fresco (GitHub tem cache de ~5 min).
+// Antes mudava a cada 1 min (impedindo o cache do GitHub e tornando TOTA
+// carga um download frio/lento). Agora a cada 5 min: dentro de 5 min o
+// GitHub raw reutiliza o cache dele (mais rapido), e fora disso busca novo.
 function bustCache(url) {
-  return url + "?t=" + Math.floor(Date.now() / 60000);
+  return url + "?t=" + Math.floor(Date.now() / 300000);
+}
+
+// Fetch com timeout: se o GitHub raw estiver lento/indisponivel, a pagina
+// mostra um erro claro com botao de tentar de novo, em vez de ficar
+// "carregando" para sempre.
+async function fetchWithTimeout(url, ms = 25000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    return await fetch(url, { signal: ctrl.signal });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // ─── UTILITÁRIOS ──────────────────────────────────────────────────────────────
@@ -608,8 +624,8 @@ async function loadData() {
   try {
     // Fetch paralelo: trade_log.csv + qualified_wallets.json
     const [csvResp, walletsResp] = await Promise.all([
-      fetch(bustCache(rawUrl('data/trade_log.csv'))),
-      fetch(bustCache(rawUrl('data/qualified_wallets.json'))),
+      fetchWithTimeout(bustCache(rawUrl('data/trade_log.csv'))),
+      fetchWithTimeout(bustCache(rawUrl('data/qualified_wallets.json'))),
     ]);
 
     if (!csvResp.ok) throw new Error(`trade_log.csv: ${csvResp.status}`);
@@ -645,11 +661,13 @@ async function loadData() {
     console.error(err);
     badge.className = 'badge badge-error';
     badge.textContent = 'Erro ao carregar';
+    const timedOut = err && err.name === 'AbortError';
     document.getElementById('trades-container').innerHTML =
       `<div class="error-box">
-        Não foi possível carregar os dados do GitHub.<br>
-        <small style="opacity:.7">${esc(err.message)}</small><br><br>
-        Verifica se o repositório é público e se os ficheiros existem em <code>data/</code>.
+        ${timedOut ? '⏱️ O GitHub demorou demais para responder.' : 'Não foi possível carregar os dados do GitHub.'}<br>
+        <small style="opacity:.7">${esc(timedOut ? 'Tempo limite de 25s excedido (rede lenta ou GitHub sobrecarregado).' : (err && err.message || ''))}</small><br><br>
+        Verifica a ligação à internet e o repositório (deve ser público).<br><br>
+        <button class="refresh-btn" onclick="loadData()">↻ Tentar de novo</button>
       </div>`;
   }
 }
