@@ -44,21 +44,6 @@
     "estimated_close_date": "2026-08-06",
     "opened_at": "2026-08-06T13:31:00.126232+00:00"
   },
-  "0x1fc013f04a9463eb691c3ec3445708b015525590a2c07d849fda12dd0dbdce66:Dragon Ranger Gaming:0xdcdb5ee15fd1ec895257b7fe12e44efc7d6f5ef29dd96d863630ef7d14b79284": {
-    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
-    "market_id": "0x1fc013f04a9463eb691c3ec3445708b015525590a2c07d849fda12dd0dbdce66",
-    "event_key": "val-wol-drg-2026-08-06",
-    "market_question": "Valorant: Wolves Esports vs Dragon Ranger Gaming (BO3) - VCT China Stage 2 Play-Ins",
-    "outcome": "Dragon Ranger Gaming",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.8619,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-06",
-    "opened_at": "2026-08-06T13:31:00.513778+00:00"
-  },
   "0xed605aed8e8febb3262c4212d4627ecb46f25eb6287ccff89538be33443fd2c8:SPARTA:0xe76cf69463f0eb307e79b7d5c422a9daa4112d62b419b388170205438e8868f9": {
     "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
     "market_id": "0xed605aed8e8febb3262c4212d4627ecb46f25eb6287ccff89538be33443fd2c8",
@@ -103,5 +88,20 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-06",
     "opened_at": "2026-08-06T13:31:01.991418+00:00"
+  },
+  "0x19424f2fb937d4e3b1d5c6fb3c540f7ff7961d79ceae2fb064b9c04e62e7e1ad:Mathys Erhard:0xf701781bc596360eac797e2eab81c0f486da901bede8102c7be8353f34e4b938": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0x19424f2fb937d4e3b1d5c6fb3c540f7ff7961d79ceae2fb064b9c04e62e7e1ad",
+    "event_key": "atp-dzumhur-erhard-2026-08-05",
+    "market_question": "Grodzisk Mazowiecki: Damir Dzumhur vs Mathys Erhard",
+    "outcome": "Mathys Erhard",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.5683,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-12",
+    "opened_at": "2026-08-06T14:02:09.617931+00:00"
   }
 }
