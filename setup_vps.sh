@@ -12,6 +12,21 @@ echo "==> Instalando dependências do sistema..."
 sudo apt-get update
 sudo apt-get install -y python3 python3-venv python3-pip git tmux curl
 
+# Swap: importante em VMs Always Free de 1 GB (ex.: E2.1.Micro / e2-micro).
+# Cria um swapfile de 2G se a RAM for < 2 GB, para o Python nunca rebentar.
+if [ "$(free -m | awk '/^Mem:/{print $2}')" -lt 2048 ]; then
+    if [ ! -f /swapfile ]; then
+        echo "==> RAM < 2 GB: a criar swap de 2G..."
+        sudo fallocate -l 2G /swapfile 2>/dev/null \
+            || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile >/dev/null
+        sudo swapon /swapfile
+        echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+        echo "  swap de 2G ativada."
+    fi
+fi
+
 if [ ! -d "$INSTALL_DIR" ]; then
     echo "==> A clonar o repositório..."
     git clone "$REPO_URL" "$INSTALL_DIR"
