@@ -182,6 +182,15 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
     if entry_price > config.MAX_ENTRY_PRICE:
         return False
 
+    # NOVO (FIX v12): exclui mercados ultra-rapidos por palavra-chave no
+    # titulo (ex.: "Up or Down" = janelas de 15 min de cripto). Esses
+    # mercados resolvem antes de o bot agir, mesmo com polling rapido --
+    # copiar e prejuizo quase certo (confirmado com dados reais).
+    trade_title = (source_trade.get("title") or source_trade.get("question") or "").lower()
+    for kw in config.EXCLUDED_MARKET_KEYWORDS:
+        if kw in trade_title:
+            return False
+
     # NOVO (FIX v10): filtro de idade -- ignora trades antigos. O bot ve os
     # trades da carteira com atraso (polling de 30 min + agendamento do
     # GitHub); um trade com muitas horas provavelmente e de um mercado que
@@ -210,25 +219,28 @@ def maybe_copy_trade(state: SimulationState, source_wallet: str, source_trade: d
     if size_usd > state.cash_balance:
         return False  # sem saldo fictício suficiente
 
-    # NOVO (FIX v10): checagem de mercado ativo -- so depois de passar pelos
-    # filtros baratos. Se o preco do ultimo trade do mercado ja chegou a
-    # ~1.0 (>=0.99), o mercado resolveu e nao deve ser copiado (em real, a
-    # ordem seria rejeitada). 1 chamada extra, apenas para trades que seriam
-    # copiados. Nota: so usamos o sinal ">=0.99" (nao <=0.01) para nao barrar
-    # mercados ativos com lado azarado barato (ex.: longshot a 0.01).
+    # NOVO (FIX v10 + v12): checagem de mercado ativo -- so depois de passar
+    # pelos filtros baratos. Se QUALQUER lado do mercado ja esta num preco
+    # "decidido" (>= MARKET_DECIDED_PRICE, padrao 0.95), o resultado e quase
+    # certo e nao devemos copiar (em real, seria ordem em mercado preste a
+    # fechar / lado morto). FIX v12: antes era >=0.99 e deixava passar
+    # mercados decididos a 0.90-0.97, copiando o lado perdedor a 0.03-0.30.
+    # 1 chamada extra, apenas para trades que seriam copiados.
     if market_id:
         try:
-            recent = pm.get_trades_for_market(market_id, limit=10)
+            recent = pm.get_trades_for_market(market_id, limit=25)
         except Exception:
             recent = []
+        max_px = 0.0
         for t in recent:
             p = t.get("price")
             try:
                 p = float(p)
             except (TypeError, ValueError):
                 continue
-            if p >= 0.99:
-                return False  # mercado ja resolvido (algum lado venceu)
+            max_px = max(max_px, p)
+        if max_px >= config.MARKET_DECIDED_PRICE:
+            return False  # mercado ja "decidido" (algum lado ~certo)
 
     # NOVO (FIX v10): custos de execucao (taxa + slippage), com slippage POR
     # ATRASO. Quanto mais velho o trade, pior o preco que conseguiriamos de

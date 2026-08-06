@@ -68,6 +68,19 @@ MAX_ENTRY_PRICE = 0.90
 MAX_TRADE_AGE_MINUTES = 30
 SLIPPAGE_PER_AGE_HOUR = 0.02
 MAX_SLIPPAGE_PCT = 0.10
+
+# NOVO (FIX v12): preco a partir do qual consideramos o mercado ja "decidido"
+# e NAO copiamos. O guard anterior so bloqueava em >=0.99 -- tarde demais:
+# mercados ja decididos costumam ter o vencedor a 0.90-0.97 (e o bot copiava
+# o lado PERDEDOR a 0.03-0.30, prejuizo quase garantido). Com 0.95, bloqueamos
+# quando um lado ja esta ~95% certo (confirmado com dados reais 2026-08-06).
+MARKET_DECIDED_PRICE = 0.95
+
+# NOVO (FIX v12): mercados a EXCLUIR da copia por palavra-chave no titulo.
+# "Up or Down" sao janelas de 15 min de cripto -- inviaveis para copy trading
+# (resolvem antes de o bot agir, mesmo num VPS com polling rapido). Adicione
+# outras palavras-chave (minusculas) se quiser excluir mais categorias.
+EXCLUDED_MARKET_KEYWORDS = ["up or down"]
 # ---------------------------------------------------------------------------
 # CUSTOS DE EXECUCAO (taxa + slippage)
 # ---------------------------------------------------------------------------

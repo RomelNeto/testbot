@@ -6,7 +6,6 @@ Isto NAO faz parte do bot em si -- e soh um script de verificacao.
 Pode ser apagado depois de conferir que tudo funciona.
 """
 import os
-import random
 import time
 from unittest import mock
 
@@ -33,22 +32,23 @@ def fake_market_winner(market_id):
 def fake_trades_for_user(wallet_address, limit=500, offset=0):
     if offset > 0:
         return []
-    random.seed(hash(wallet_address) % 1000)
-    # Vies de acerto: WALLET_A acerta ~70% dos mercados, os demais ~30%.
-    bias = 0.7 if wallet_address == WALLET_A else 0.3
+    # Deterministico (NAO usar hash(): e aleatorio entre execucoes do Python
+    # e deixa o teste flaky). WALLET_A acerta 70% dos mercados, demais 30%.
+    hit_rate = 7 if wallet_address == WALLET_A else 3
     now = int(time.time())
     trades = []
     for i in range(120):
         mid = f"market-{i % 15}"
         winner = fake_market_winner(mid)
-        outcome = winner if random.random() < bias else ("No" if winner == "Yes" else "Yes")
+        match = (i % 10) < hit_rate
+        outcome = winner if match else ("No" if winner == "Yes" else "Yes")
         trades.append({
             "id": f"{wallet_address}-trade-{i}",
             "conditionId": mid,
             "outcome": outcome,
             "side": "BUY",
-            "price": round(random.uniform(0.2, 0.8), 2),
-            "size": round(random.uniform(50, 500), 2),
+            "price": round(0.2 + (i % 60) / 100.0, 2),
+            "size": 100.0 + (i % 5) * 50,
             "timestamp": now - i * 60,  # do mais novo ao mais antigo (como a API)
             "title": f"Mercado de teste {i % 15}",
         })
