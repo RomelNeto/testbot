@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
 # oracle_a1_retry.sh — cria AUTOMATICAMENTE a VM Ampere A1 (Always Free) quando
 # houver capacidade, em loop. Corre no OCI Cloud Shell (CLI já autenticado) —
-# sem API key, sem AWS.
-#
-# PRÉ-REQUISITO (1 vez, na consola Oracle):
-#   Networking → VCN → Create VCN → escolher "Create Virtual Cloud Network Plus
-#   Related Resources" → Create.
-#   Isto cria VCN + subnet pública + route + security list (SSH 22 aberto).
+# sem API key, sem AWS e SEM precisar de tocar no console (cria a própria rede:
+# VCN + subnet pública + gateway + regras SSH).
 #
 # Uso no Cloud Shell:
 #   bash <(curl -sL https://raw.githubusercontent.com/RomelNeto/testbot/main/deploy/oracle_a1_retry.sh)
-#   # ou, para mudar shape: bash oracle_a1_retry.sh EU-MADRID-1-AD-1 2 12
+#   # conservador (entra mais fácil): bash ... EU-MADRID-1-AD-1 2 12
 #
 # Parâmetros: [AD] [OCPU] [GB]
 set -uo pipefail
@@ -19,6 +15,7 @@ AD_NAME="${1:-EU-MADRID-1-AD-1}"
 OCPU="${2:-4}"
 MEM_GB="${3:-24}"
 INSTANCE_NAME="testbot-a1"
+VCN_NAME="vcn-testbot"
 SSH_PUBKEY="${SSH_PUBKEY:-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ3hdAEzp4IA087fz9JsPlmdLcQiObX8BYxi1A4729K6 testbot-oracle}"
 
 echo "==> A obter compartment (raiz)..."
@@ -28,15 +25,63 @@ COMPARTMENT_OCID=$(oci iam compartment list --compartment-id-in-subtree true \
   --query "data[0].id" --raw-output)
 echo "    compartment: $COMPARTMENT_OCID"
 
-echo "==> A procurar subnet pública existente..."
+# ---------------------------------------------------------------------------
+# Garantir a rede: VCN + internet gateway + rota + security list (SSH) + subnet
+# ---------------------------------------------------------------------------
+VCN_OCID=$(oci network vcn list --compartment-id "$COMPARTMENT_OCID" \
+  --query "data[?contains(\"display-name\",'$VCN_NAME')].id | [0]" --raw-output 2>/dev/null)
+if [ -z "$VCN_OCID" ] || [ "$VCN_OCID" = "null" ]; then
+  echo "==> A criar VCN $VCN_NAME..."
+  VCN_OCID=$(oci network vcn create --compartment-id "$COMPARTMENT_OCID" \
+    --cidr-block "10.0.0.0/16" --display-name "$VCN_NAME" --dns-label "testbot" \
+    --query "data.id" --raw-output)
+else
+  echo "==> VCN existente: $VCN_OCID"
+fi
+
+IGW_OCID=$(oci network internet-gateway list --compartment-id "$COMPARTMENT_OCID" \
+  --vcn-id "$VCN_OCID" --query "data[0].id" --raw-output 2>/dev/null)
+if [ -z "$IGW_OCID" ] || [ "$IGW_OCID" = "null" ]; then
+  echo "==> A criar internet gateway..."
+  IGW_OCID=$(oci network internet-gateway create --compartment-id "$COMPARTMENT_OCID" \
+    --vcn-id "$VCN_OCID" --is-enabled true --display-name "igw-testbot" \
+    --query "data.id" --raw-output)
+fi
+
+ROUTE_ID=$(oci network route-table list --compartment-id "$COMPARTMENT_OCID" \
+  --vcn-id "$VCN_OCID" --query "data[0].id" --raw-output)
+echo "==> A garantir rota 0.0.0.0/0 -> internet..."
+oci network route-table update --route-table-id "$ROUTE_ID" \
+  --route-rules "[{\"cidrBlock\":\"0.0.0.0/0\",\"networkEntityId\":\"$IGW_OCID\"}]" \
+  --force >/dev/null 2>&1 || echo "    (rota já configurada)"
+
+SEC_LIST_ID=$(oci network security-list list --compartment-id "$COMPARTMENT_OCID" \
+  --vcn-id "$VCN_OCID" --query "data[0].id" --raw-output)
+echo "==> A garantir SSH (22) na security list..."
+oci network security-list update --security-list-id "$SEC_LIST_ID" \
+  --ingress-security-rules '[{"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":22,"max":22}}}]' \
+  --egress-security-rules '[{"destination":"0.0.0.0/0","protocol":"all"}]' \
+  --force >/dev/null 2>&1 || echo "    (security list já configurada)"
+
 SUBNET_OCID=$(oci network subnet list --compartment-id "$COMPARTMENT_OCID" \
-  --query "data[?contains(\"display-name\",'Public')].id | [0]" --raw-output 2>/dev/null)
+  --vcn-id "$VCN_OCID" --query "data[0].id" --raw-output 2>/dev/null)
 if [ -z "$SUBNET_OCID" ] || [ "$SUBNET_OCID" = "null" ]; then
-  echo "ERRO: não encontrei subnet pública. Cria primeiro na consola:"
-  echo "  Networking → VCN → Create VCN → 'Create Virtual Cloud Network Plus Related Resources'"
-  exit 1
+  echo "==> A criar subnet pública 10.0.0.0/24..."
+  SUBNET_OCID=$(oci network subnet create --compartment-id "$COMPARTMENT_OCID" \
+    --vcn-id "$VCN_OCID" --cidr-block "10.0.0.0/24" \
+    --route-table-id "$ROUTE_ID" --security-list-ids "[\"$SEC_LIST_ID\"]" \
+    --display-name "subnet-testbot-public" --dns-label "public" \
+    --query "data.id" --raw-output)
 fi
 echo "    subnet: $SUBNET_OCID"
+
+echo "==> A aguardar subnet ficar AVAILABLE..."
+for _i in $(seq 1 15); do
+  ST=$(oci network subnet get --subnet-id "$SUBNET_OCID" \
+    --query 'data."lifecycle-state"' --raw-output 2>/dev/null || echo "")
+  [ "$ST" = "AVAILABLE" ] && break
+  sleep 5
+done
 
 echo "==> A procurar imagem Ubuntu 22.04 (ARM) compatível com A1..."
 IMAGE_OCID=$(oci compute image list --compartment-id "$COMPARTMENT_OCID" \
