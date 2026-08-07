@@ -1,19 +1,4 @@
 {
-  "0xca3c5644786755136ef3426a0793a45a87a30698e73d6cee0883adf8e648e8ff:Elise Mertens:0xb0d17286e72d9538af583c74851e28877e62ca1ce16cad3744d473149de3b529": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0xca3c5644786755136ef3426a0793a45a87a30698e73d6cee0883adf8e648e8ff",
-    "event_key": "wta-mertens-osaka-2026-08-08",
-    "market_question": "National Bank Open: Elise Mertens vs Naomi Osaka",
-    "outcome": "Elise Mertens",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.3052,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-15",
-    "opened_at": "2026-08-07T19:28:30.790743+00:00"
-  },
   "0x377d771fbb92cb291fefa615427826f82e66adbf27dd9b2f9142331ea8a6e087:Hanwha Life Esports:0x65b35a0823cf3e5419a61ba64425c9fde6197c406f4ed04fb0ec60c05a4c1e09": {
     "source_wallet": "0x04b1e3aff4fed7a6868757761db7486ddb6cd224",
     "market_id": "0x377d771fbb92cb291fefa615427826f82e66adbf27dd9b2f9142331ea8a6e087",
@@ -28,5 +13,20 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": null,
     "opened_at": "2026-08-07T21:09:51.702226+00:00"
+  },
+  "0x71fa2b9df79ae3aed7721dfde68b16673f191b93cfcc24909ccd237fbe1a334c:Pittsburgh Pirates:0x76f3998e5f039640d51f50bc572df96154c2f3ea5dc6f07dd9874161bbe82155": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0x71fa2b9df79ae3aed7721dfde68b16673f191b93cfcc24909ccd237fbe1a334c",
+    "event_key": "mlb-nym-pit-2026-08-07",
+    "market_question": "New York Mets vs. Pittsburgh Pirates",
+    "outcome": "Pittsburgh Pirates",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.3966,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-14",
+    "opened_at": "2026-08-07T23:58:04.235429+00:00"
   }
 }
