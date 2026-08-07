@@ -1,19 +1,4 @@
 {
-  "0x66f26f18634d6cfe94e69fadd9e6abd3e531d42848f427acfd9d54bd0acba124:BoostGate Esports:0x57e4f2d061324c5a49af105f19e7e351c41ccb9afe99e191a480224139b816cb": {
-    "source_wallet": "0xeac22222ef8d2be457c00101a1a4e4925ec5dddc",
-    "market_id": "0x66f26f18634d6cfe94e69fadd9e6abd3e531d42848f427acfd9d54bd0acba124",
-    "event_key": "lol-bgt-su-2026-08-06",
-    "market_question": "Game Handicap: SU (-1.5) vs BoostGate Esports (+1.5)",
-    "outcome": "BoostGate Esports",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.2344,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-06",
-    "opened_at": "2026-08-06T13:31:01.991418+00:00"
-  },
   "0xc8c2d49665ab4bac36e685d801e733341b7e28cd2a17463864f218f0405c2b29:Matteo Arnaldi:0x4786954c45dda172cf6b0964d560a66bb430c28e9b7facb9ae209949d74ee304": {
     "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
     "market_id": "0xc8c2d49665ab4bac36e685d801e733341b7e28cd2a17463864f218f0405c2b29",
@@ -29,19 +14,34 @@
     "estimated_close_date": "2026-08-14",
     "opened_at": "2026-08-07T12:57:39.158226+00:00"
   },
-  "0x362b66a3de0b59ecf6a61da0e1ec123e7dcc08628c125b8d13f3981b50064fbb:Petr Nesterov:0x5be731db571bf868c1e8717976049de0baf0ba3431233e55c2efa2e0b049e6bf": {
+  "0xeaa2afb8617dcda8f5aaf16c8918083ee7221032830deb276503053465199362:Shifters:0x8078ae95ea4a325f21b86915d5d6dd46268eeff5777df53e734d8929a33211f6": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0xeaa2afb8617dcda8f5aaf16c8918083ee7221032830deb276503053465199362",
+    "event_key": "lol-shft-gx-2026-08-07",
+    "market_question": "LoL: Shifters vs GIANTX - Game 2 Winner",
+    "outcome": "Shifters",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.1315,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-07",
+    "opened_at": "2026-08-07T16:23:32.533698+00:00"
+  },
+  "0xbab5d86d416295fa03339824805064649f3bdc7e52b87e45caa2a852bdfc9a92:Carlos Taberner:0x388a763f73700502715176fdcc456d513a212b2d4766e17d91ea3376f3316a54": {
     "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
-    "market_id": "0x362b66a3de0b59ecf6a61da0e1ec123e7dcc08628c125b8d13f3981b50064fbb",
-    "event_key": "atp-andreev-nestero-2026-08-07",
-    "market_question": "Plovdiv 2: Adrian Andreev vs Petr Nesterov",
-    "outcome": "Petr Nesterov",
+    "market_id": "0xbab5d86d416295fa03339824805064649f3bdc7e52b87e45caa2a852bdfc9a92",
+    "event_key": "atp-moeller-taberne-2026-08-07",
+    "market_question": "Hagen: Elmer Moeller vs Carlos Taberner",
+    "outcome": "Carlos Taberner",
     "outcome_index": 1,
     "side": "BUY",
-    "entry_price": 0.5589,
+    "entry_price": 0.2327,
     "size_usd": 15.0,
     "fee_usd": 0.3,
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-14",
-    "opened_at": "2026-08-07T15:24:35.126618+00:00"
+    "opened_at": "2026-08-07T16:23:33.786217+00:00"
   }
 }
