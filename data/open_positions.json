@@ -14,21 +14,6 @@
     "estimated_close_date": "2026-08-06",
     "opened_at": "2026-08-06T13:31:01.991418+00:00"
   },
-  "0x537444ede763ded94dd33916cfe8c24a3f059c0fa05e4ef270d1a4576b30f5db:Bilibili Gaming:0x215d8cc95cd2be49a7c760712eb3858ec9d4b9e6e4dd659120ba382a68a59596": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0x537444ede763ded94dd33916cfe8c24a3f059c0fa05e4ef270d1a4576b30f5db",
-    "event_key": "lol-blg-tes-2026-08-07",
-    "market_question": "LoL: Bilibili Gaming vs Top Esports - Game 1 Winner",
-    "outcome": "Bilibili Gaming",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.6177,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-07",
-    "opened_at": "2026-08-07T12:57:36.692519+00:00"
-  },
   "0x4c5665a5aecf8436f03e06e31e784b9858b0e099ef254de8538cd387d91b2d1e:Florent Bax:0x4586a75a4ead0266765941f6495db339e1e3abb9b48b5d47280e402f52cfa129": {
     "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
     "market_id": "0x4c5665a5aecf8436f03e06e31e784b9858b0e099ef254de8538cd387d91b2d1e",
@@ -43,36 +28,6 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-14",
     "opened_at": "2026-08-07T12:57:37.812088+00:00"
-  },
-  "0x4665b1a1985b3563a06dcfff80cf3dcec3c88dc6e827296b96070f505a18712b:Guy Den Ouden:0x3ac9827204086477c8d235dcec4e7becd30c8a2a34ac1727a6eb8e3f197733e0": {
-    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
-    "market_id": "0x4665b1a1985b3563a06dcfff80cf3dcec3c88dc6e827296b96070f505a18712b",
-    "event_key": "atp-piros-ouden-2026-08-07",
-    "market_question": "Hagen: Zsombor Piros vs Guy Den Ouden",
-    "outcome": "Guy Den Ouden",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.6504,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-14",
-    "opened_at": "2026-08-07T12:57:38.262820+00:00"
-  },
-  "0x33d1d508f874588e18f343a4535d0fa5193067d8f7602c6803cbc7eb1bcf4181:Lorenzo Giustino:0xb3025b992c0ba71df53a2b028d3f9bf40b34477fc69422a41869a03e2e363aa7": {
-    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
-    "market_id": "0x33d1d508f874588e18f343a4535d0fa5193067d8f7602c6803cbc7eb1bcf4181",
-    "event_key": "atp-giustin-kym-2026-08-07",
-    "market_question": "Hagen: Lorenzo Giustino vs Jerome Kym",
-    "outcome": "Lorenzo Giustino",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.1018,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-14",
-    "opened_at": "2026-08-07T12:57:38.721717+00:00"
   },
   "0xc8c2d49665ab4bac36e685d801e733341b7e28cd2a17463864f218f0405c2b29:Matteo Arnaldi:0x4786954c45dda172cf6b0964d560a66bb430c28e9b7facb9ae209949d74ee304": {
     "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
@@ -104,34 +59,19 @@
     "estimated_close_date": "2026-08-14",
     "opened_at": "2026-08-07T12:57:39.564889+00:00"
   },
-  "0x3afdfcb1f5499054e5d64f2ac0f31b91ab3f04d1f4fa81ec7d99d5ce8224666b:Over:0x2fe82082f9ebba95a1a4fe271671fb2236ce9094715d46b89e74822bf4789926": {
-    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
-    "market_id": "0x3afdfcb1f5499054e5d64f2ac0f31b91ab3f04d1f4fa81ec7d99d5ce8224666b",
-    "event_key": "chi-bgu-xin-2026-08-07-more-markets",
-    "market_question": "Beijing Guoan FC vs. Shenzhen Xinpengcheng FC: O/U 3.5",
-    "outcome": "Over",
-    "outcome_index": 0,
-    "side": "SELL",
-    "entry_price": 0.5608,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": null,
-    "opened_at": "2026-08-07T12:57:40.548426+00:00"
-  },
-  "0x6a10e527a0883bfeb22563cd1016e4815f872ec1a7f48b7655a766336404d3be:TEC Esports:0x2d5c4e9f8de12d0c91da7656f8effc9fef44fa717e6a34882431cbc5aaee7f67": {
+  "0xadc9b63c2fea8fe8e37a41b7be199dcebeeddfba916511be3744fe2ecb693992:Heroic:0xb2cc9e69f5f0fc66b9652ffed2bb68e253336a8dd810d3e5f835996b15f1ae17": {
     "source_wallet": "0xeac22222ef8d2be457c00101a1a4e4925ec5dddc",
-    "market_id": "0x6a10e527a0883bfeb22563cd1016e4815f872ec1a7f48b7655a766336404d3be",
-    "event_key": "val-edg1-tec-2026-08-07",
-    "market_question": "Valorant: EDward Gaming vs TEC Esports (BO3) - VCT China Stage 2 Play-Ins",
-    "outcome": "TEC Esports",
-    "outcome_index": 1,
+    "market_id": "0xadc9b63c2fea8fe8e37a41b7be199dcebeeddfba916511be3744fe2ecb693992",
+    "event_key": "cs2-hero-9ine-2026-08-07",
+    "market_question": "Counter-Strike: Heroic vs 9INE - Map 2 Winner",
+    "outcome": "Heroic",
+    "outcome_index": 0,
     "side": "BUY",
-    "entry_price": 0.3138,
+    "entry_price": 0.7185,
     "size_usd": 15.0,
     "fee_usd": 0.3,
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-07",
-    "opened_at": "2026-08-07T12:57:41.244127+00:00"
+    "opened_at": "2026-08-07T14:14:33.345172+00:00"
   }
 }
