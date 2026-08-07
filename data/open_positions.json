@@ -13,20 +13,5 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-06",
     "opened_at": "2026-08-06T13:31:01.991418+00:00"
-  },
-  "0xa5144d487f22937f5bc46c655ab3cf1063edebefef327fa08ffeed421e60688f:Boston Red Sox:0x003524655d6beb5e919a3a192a85bb788726674fd4943659456351cdc8ab77af": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0xa5144d487f22937f5bc46c655ab3cf1063edebefef327fa08ffeed421e60688f",
-    "event_key": "mlb-cws-bos-2026-08-06",
-    "market_question": "Chicago White Sox vs. Boston Red Sox",
-    "outcome": "Boston Red Sox",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.3346,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-13",
-    "opened_at": "2026-08-07T00:23:27.320180+00:00"
   }
 }
