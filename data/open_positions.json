@@ -29,21 +29,6 @@
     "estimated_close_date": "2026-08-14",
     "opened_at": "2026-08-07T19:28:29.193688+00:00"
   },
-  "0x8da6ffed830d8620fd50f8c66c815242917ebcac699804614559bc840a97dc52:Fnatic:0x18ff86a6179a93ed868580afa9c67d17ea96d8d8e0729a5c08ed5dee6be3d299": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0x8da6ffed830d8620fd50f8c66c815242917ebcac699804614559bc840a97dc52",
-    "event_key": "val-fnc1-ep1-2026-08-07",
-    "market_question": "Valorant: Fnatic vs Enterprise Esports (BO3) - VCT EMEA Play-Ins",
-    "outcome": "Fnatic",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.5381,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-07",
-    "opened_at": "2026-08-07T19:28:29.602494+00:00"
-  },
   "0x5bba7508325523c7e99575bbf291cba209546c76aead95e1b6b35dfeca05538b:Team Heretics:0x5336ee8b7efb35bb44e82e5bd6f73c125879f43ff1eb0846e3a20e1137c59008": {
     "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
     "market_id": "0x5bba7508325523c7e99575bbf291cba209546c76aead95e1b6b35dfeca05538b",
