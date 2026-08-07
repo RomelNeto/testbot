@@ -14,21 +14,6 @@
     "estimated_close_date": "2026-08-06",
     "opened_at": "2026-08-06T13:31:01.991418+00:00"
   },
-  "0x4c5665a5aecf8436f03e06e31e784b9858b0e099ef254de8538cd387d91b2d1e:Florent Bax:0x4586a75a4ead0266765941f6495db339e1e3abb9b48b5d47280e402f52cfa129": {
-    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
-    "market_id": "0x4c5665a5aecf8436f03e06e31e784b9858b0e099ef254de8538cd387d91b2d1e",
-    "event_key": "atp-simakin-bax-2026-08-07",
-    "market_question": "Istanbul 2: Ilia Simakin vs Florent Bax",
-    "outcome": "Florent Bax",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.1218,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-14",
-    "opened_at": "2026-08-07T12:57:37.812088+00:00"
-  },
   "0xc8c2d49665ab4bac36e685d801e733341b7e28cd2a17463864f218f0405c2b29:Matteo Arnaldi:0x4786954c45dda172cf6b0964d560a66bb430c28e9b7facb9ae209949d74ee304": {
     "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
     "market_id": "0xc8c2d49665ab4bac36e685d801e733341b7e28cd2a17463864f218f0405c2b29",
@@ -44,34 +29,19 @@
     "estimated_close_date": "2026-08-14",
     "opened_at": "2026-08-07T12:57:39.158226+00:00"
   },
-  "0xdbac0cbb23983caabb31af1e6ffe6b2c5f7968fc9ef4a6c45ba6a6e9be4a89b9:Brooke Black:0xf8dbafb2e9d61608722cbe24bab69a42f68c5be727e4eab6a25e311108a8fab1": {
+  "0x362b66a3de0b59ecf6a61da0e1ec123e7dcc08628c125b8d13f3981b50064fbb:Petr Nesterov:0x5be731db571bf868c1e8717976049de0baf0ba3431233e55c2efa2e0b049e6bf": {
     "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
-    "market_id": "0xdbac0cbb23983caabb31af1e6ffe6b2c5f7968fc9ef4a6c45ba6a6e9be4a89b9",
-    "event_key": "itf-rajecki-black-2026-08-07",
-    "market_question": "ITF Roehampton: Amelia Rajecki vs Brooke Black",
-    "outcome": "Brooke Black",
+    "market_id": "0x362b66a3de0b59ecf6a61da0e1ec123e7dcc08628c125b8d13f3981b50064fbb",
+    "event_key": "atp-andreev-nestero-2026-08-07",
+    "market_question": "Plovdiv 2: Adrian Andreev vs Petr Nesterov",
+    "outcome": "Petr Nesterov",
     "outcome_index": 1,
     "side": "BUY",
-    "entry_price": 0.5913,
+    "entry_price": 0.5589,
     "size_usd": 15.0,
     "fee_usd": 0.3,
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-14",
-    "opened_at": "2026-08-07T12:57:39.564889+00:00"
-  },
-  "0xadc9b63c2fea8fe8e37a41b7be199dcebeeddfba916511be3744fe2ecb693992:Heroic:0xb2cc9e69f5f0fc66b9652ffed2bb68e253336a8dd810d3e5f835996b15f1ae17": {
-    "source_wallet": "0xeac22222ef8d2be457c00101a1a4e4925ec5dddc",
-    "market_id": "0xadc9b63c2fea8fe8e37a41b7be199dcebeeddfba916511be3744fe2ecb693992",
-    "event_key": "cs2-hero-9ine-2026-08-07",
-    "market_question": "Counter-Strike: Heroic vs 9INE - Map 2 Winner",
-    "outcome": "Heroic",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.7185,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-07",
-    "opened_at": "2026-08-07T14:14:33.345172+00:00"
+    "opened_at": "2026-08-07T15:24:35.126618+00:00"
   }
 }
