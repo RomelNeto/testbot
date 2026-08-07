@@ -13,5 +13,20 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-06",
     "opened_at": "2026-08-06T13:31:01.991418+00:00"
+  },
+  "0xab7867677c0ae3e46e5374073ff2420e87bf943e799341141e53ad2f9816487b:Trace Esports:0x4e1c986265fb87a67d245ddcf04e4c8740203f01d6e0b90a4f1b1f83e001ab46": {
+    "source_wallet": "0xeac22222ef8d2be457c00101a1a4e4925ec5dddc",
+    "market_id": "0xab7867677c0ae3e46e5374073ff2420e87bf943e799341141e53ad2f9816487b",
+    "event_key": "val-ag1-te-2026-08-07",
+    "market_question": "Valorant: All Gamers vs Trace Esports (BO3) - VCT China Stage 2 Play-Ins",
+    "outcome": "Trace Esports",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.2532,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-07",
+    "opened_at": "2026-08-07T08:11:46.629884+00:00"
   }
 }
