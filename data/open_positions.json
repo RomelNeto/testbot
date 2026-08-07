@@ -14,34 +14,34 @@
     "estimated_close_date": "2026-08-14",
     "opened_at": "2026-08-07T12:57:39.158226+00:00"
   },
-  "0xeaa2afb8617dcda8f5aaf16c8918083ee7221032830deb276503053465199362:Shifters:0x8078ae95ea4a325f21b86915d5d6dd46268eeff5777df53e734d8929a33211f6": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0xeaa2afb8617dcda8f5aaf16c8918083ee7221032830deb276503053465199362",
-    "event_key": "lol-shft-gx-2026-08-07",
-    "market_question": "LoL: Shifters vs GIANTX - Game 2 Winner",
-    "outcome": "Shifters",
+  "0xd4acf1ca0bef2722ac117b254dc1bb292b97fd6088781eb1651ac7dec51dfdce:Ann Li:0x8fab87fefc296beb49c3add93e3df16f421f9ad7b740ce3a352cfaf3bc397268": {
+    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
+    "market_id": "0xd4acf1ca0bef2722ac117b254dc1bb292b97fd6088781eb1651ac7dec51dfdce",
+    "event_key": "wta-annli-rybakin-2026-08-07",
+    "market_question": "National Bank Open: Ann Li vs Elena Rybakina",
+    "outcome": "Ann Li",
     "outcome_index": 0,
     "side": "BUY",
-    "entry_price": 0.1315,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-07",
-    "opened_at": "2026-08-07T16:23:32.533698+00:00"
-  },
-  "0xbab5d86d416295fa03339824805064649f3bdc7e52b87e45caa2a852bdfc9a92:Carlos Taberner:0x388a763f73700502715176fdcc456d513a212b2d4766e17d91ea3376f3316a54": {
-    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
-    "market_id": "0xbab5d86d416295fa03339824805064649f3bdc7e52b87e45caa2a852bdfc9a92",
-    "event_key": "atp-moeller-taberne-2026-08-07",
-    "market_question": "Hagen: Elmer Moeller vs Carlos Taberner",
-    "outcome": "Carlos Taberner",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.2327,
+    "entry_price": 0.1119,
     "size_usd": 15.0,
     "fee_usd": 0.3,
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-14",
-    "opened_at": "2026-08-07T16:23:33.786217+00:00"
+    "opened_at": "2026-08-07T17:22:37.112413+00:00"
+  },
+  "0x1ff68de0e21aec2c0a8b25b7a46280cb544194e80e6c09194ffdae5274f0e581:Sangal:0x0b82eb6e15597f0f3abcfd508084974f7a51837904996edc7e30aac1658946e8": {
+    "source_wallet": "0xeac22222ef8d2be457c00101a1a4e4925ec5dddc",
+    "market_id": "0x1ff68de0e21aec2c0a8b25b7a46280cb544194e80e6c09194ffdae5274f0e581",
+    "event_key": "cs2-vp-sng2-2026-08-07",
+    "market_question": "Counter-Strike: Virtus.pro vs Sangal - Map 2 Winner",
+    "outcome": "Sangal",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.4048,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-07",
+    "opened_at": "2026-08-07T17:22:37.851610+00:00"
   }
 }
