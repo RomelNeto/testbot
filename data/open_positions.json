@@ -29,19 +29,49 @@
     "estimated_close_date": "2026-08-06",
     "opened_at": "2026-08-06T15:40:19.854191+00:00"
   },
-  "0x42fbb579bf53099fa5469349e094cfc27411c80dc1c1c337934f53290f26ad81:Juan Sebastian Osorio:0x30f500762b4cb73eaaeab15bccf7f6c89f86c6115b9312a8c4d243b3b4a6c856": {
+  "0xa5144d487f22937f5bc46c655ab3cf1063edebefef327fa08ffeed421e60688f:Boston Red Sox:0x003524655d6beb5e919a3a192a85bb788726674fd4943659456351cdc8ab77af": {
     "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0x42fbb579bf53099fa5469349e094cfc27411c80dc1c1c337934f53290f26ad81",
-    "event_key": "itf-osorio-zeitune-2026-08-06",
-    "market_question": "ITF Londrina: Juan Sebastian Osorio vs Maximo Zeitune",
-    "outcome": "Juan Sebastian Osorio",
-    "outcome_index": 0,
+    "market_id": "0xa5144d487f22937f5bc46c655ab3cf1063edebefef327fa08ffeed421e60688f",
+    "event_key": "mlb-cws-bos-2026-08-06",
+    "market_question": "Chicago White Sox vs. Boston Red Sox",
+    "outcome": "Boston Red Sox",
+    "outcome_index": 1,
     "side": "BUY",
-    "entry_price": 0.0911,
+    "entry_price": 0.3346,
     "size_usd": 15.0,
     "fee_usd": 0.3,
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-13",
-    "opened_at": "2026-08-06T22:17:19.780056+00:00"
+    "opened_at": "2026-08-07T00:23:27.320180+00:00"
+  },
+  "0xb871d18b5682b0445c7a4588888e79c2f07860621a3254ccecc21e18f31c61f0:Millen Hurrion:0x1f6826f4cdd4b5414a949eef034f520a415e24e6138fb7f5619078562f1afe39": {
+    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
+    "market_id": "0xb871d18b5682b0445c7a4588888e79c2f07860621a3254ccecc21e18f31c61f0",
+    "event_key": "atp-marti-hurrion-2026-08-06",
+    "market_question": "Lexington: Andres Martin vs Millen Hurrion",
+    "outcome": "Millen Hurrion",
+    "outcome_index": 1,
+    "side": "SELL",
+    "entry_price": 0.2732,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-13",
+    "opened_at": "2026-08-07T00:23:28.722846+00:00"
+  },
+  "0x6f64642abf65589082bbcadc4907845c2f003fb25a7891d358e57cc7ea6e7bf8:Amanda Anisimova:0xc9bee61d3085731de5640bce67c37298f71721db9d9cac83bc32f8071a668c7c": {
+    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
+    "market_id": "0x6f64642abf65589082bbcadc4907845c2f003fb25a7891d358e57cc7ea6e7bf8",
+    "event_key": "wta-bartunk-anisimo-2026-08-06",
+    "market_question": "National Bank Open: Nikola Bartunkova vs Amanda Anisimova",
+    "outcome": "Amanda Anisimova",
+    "outcome_index": 1,
+    "side": "SELL",
+    "entry_price": 0.5287,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": null,
+    "opened_at": "2026-08-07T00:23:29.845748+00:00"
   }
 }
