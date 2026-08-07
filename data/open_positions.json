@@ -14,21 +14,6 @@
     "estimated_close_date": "2026-08-06",
     "opened_at": "2026-08-06T13:31:01.991418+00:00"
   },
-  "0xab7867677c0ae3e46e5374073ff2420e87bf943e799341141e53ad2f9816487b:Trace Esports:0x4e1c986265fb87a67d245ddcf04e4c8740203f01d6e0b90a4f1b1f83e001ab46": {
-    "source_wallet": "0xeac22222ef8d2be457c00101a1a4e4925ec5dddc",
-    "market_id": "0xab7867677c0ae3e46e5374073ff2420e87bf943e799341141e53ad2f9816487b",
-    "event_key": "val-ag1-te-2026-08-07",
-    "market_question": "Valorant: All Gamers vs Trace Esports (BO3) - VCT China Stage 2 Play-Ins",
-    "outcome": "Trace Esports",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.2532,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-07",
-    "opened_at": "2026-08-07T08:11:46.629884+00:00"
-  },
   "0xb0c1520b73ab7914ff7c6911d9dae3fb23c43e9e135d66e5a5c60c81fc7e0be3:Team WE:0xe50004d2985ba50aae8b32c7174353a06d41e00c17a209d4efe864c074d384da": {
     "source_wallet": "0x85d53efdd055aa88fb00a914f5615bfd585545ee",
     "market_id": "0xb0c1520b73ab7914ff7c6911d9dae3fb23c43e9e135d66e5a5c60c81fc7e0be3",
@@ -43,5 +28,35 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-07",
     "opened_at": "2026-08-07T09:13:14.251684+00:00"
+  },
+  "0x79d0ea5ea6d05403e4cfc54b728876696ea78dcdaf5c947c76dd21b826946e42:Daniil Glinka:0x1dc695dd4de73cc241d5d1ad012c452756ba317ea4181263c3306fd9fc9ac6cb": {
+    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
+    "market_id": "0x79d0ea5ea6d05403e4cfc54b728876696ea78dcdaf5c947c76dd21b826946e42",
+    "event_key": "atp-donski-glinka-2026-08-07",
+    "market_question": "Grodzisk Mazowiecki: Alexander Donski vs Daniil Glinka",
+    "outcome": "Daniil Glinka",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.5369,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-14",
+    "opened_at": "2026-08-07T10:50:25.254781+00:00"
+  },
+  "0x6972e2071fbdaa77ce4ea6a9eb33e23e8df55b3963afe57b386b8fa8b67f1a8b:BNK FEARX:0x972495a5ce25a57aca319be9e93525db33e176e116c2adda1b7d82b9303bdac9": {
+    "source_wallet": "0xf9d6bdeab230b7f65dbe236196d01bad8488730a",
+    "market_id": "0x6972e2071fbdaa77ce4ea6a9eb33e23e8df55b3963afe57b386b8fa8b67f1a8b",
+    "event_key": "lol-fox1-bro2-2026-08-07",
+    "market_question": "LoL: BNK FEARX vs HANJIN BRION (BO3) - LCK Round 3-4 Rise Group",
+    "outcome": "BNK FEARX",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.7304,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-07",
+    "opened_at": "2026-08-07T10:50:25.823355+00:00"
   }
 }
