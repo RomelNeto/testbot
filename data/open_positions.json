@@ -29,19 +29,19 @@
     "estimated_close_date": "2026-08-08",
     "opened_at": "2026-08-08T01:58:05.757181+00:00"
   },
-  "0xbddca37384096eb5bb7597246b622a809aca39f04c17291af836720d3d954419:Wolves Esports:0xbf288ebf2e1434d0e4e0c3b8e44a407694d9fa7938e23c6aec3bb935d648ba63": {
-    "source_wallet": "0xeac22222ef8d2be457c00101a1a4e4925ec5dddc",
-    "market_id": "0xbddca37384096eb5bb7597246b622a809aca39f04c17291af836720d3d954419",
-    "event_key": "val-at1-wol-2026-08-08",
-    "market_question": "Valorant: A Team vs Wolves Esports - Map 1 Winner",
-    "outcome": "Wolves Esports",
-    "outcome_index": 1,
+  "0xfe618c0cbeabbff551ff69f9d0faf3e902f1dd266a8dfce0f48b2d0820ca2b4d:Andrea Guerrieri:0x3722463cc35b9ac689ef9db4c467e770f17b282dedb61ed6aee2a639b39415e2": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0xfe618c0cbeabbff551ff69f9d0faf3e902f1dd266a8dfce0f48b2d0820ca2b4d",
+    "event_key": "atp-guerrie-glinka-2026-08-08",
+    "market_question": "Grodzisk Mazowiecki: Andrea Guerrieri vs Daniil Glinka",
+    "outcome": "Andrea Guerrieri",
+    "outcome_index": 0,
     "side": "BUY",
-    "entry_price": 0.3536,
+    "entry_price": 0.4368,
     "size_usd": 15.0,
     "fee_usd": 0.3,
     "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-08",
-    "opened_at": "2026-08-08T08:37:12.946086+00:00"
+    "estimated_close_date": "2026-08-15",
+    "opened_at": "2026-08-08T09:34:47.718901+00:00"
   }
 }
