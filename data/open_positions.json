@@ -43,20 +43,5 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-09",
     "opened_at": "2026-08-08T15:37:38.817727+00:00"
-  },
-  "0x6b3f1b6f38d2e88f1613331721b6711216b4119a7611254f4fabb00567f7cd39:SK Gaming:0xd96033e2e05575e272c36a3b88fa368ff655f8cebe5131dd37c89e5d0bd21879": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0x6b3f1b6f38d2e88f1613331721b6711216b4119a7611254f4fabb00567f7cd39",
-    "event_key": "lol-sk-navi-2026-08-08",
-    "market_question": "LoL: SK Gaming vs Natus Vincere - Game 2 Winner",
-    "outcome": "SK Gaming",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.6184,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-08",
-    "opened_at": "2026-08-08T16:30:16.729271+00:00"
   }
 }
