@@ -29,19 +29,19 @@
     "estimated_close_date": "2026-08-08",
     "opened_at": "2026-08-08T01:58:05.757181+00:00"
   },
-  "0xcda7d97d3f0878a3d7c0446f47d2796b576653c35df8ae2e8bc7754babb45f6f:Arnav Vijay Paparkar:0x9b0b758b254b70b3b0d2880603c9206772101e971446b14018cbbd6fa8c61aed": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0xcda7d97d3f0878a3d7c0446f47d2796b576653c35df8ae2e8bc7754babb45f6f",
-    "event_key": "itf-pleshiv-paparka-2026-08-08",
-    "market_question": "ITF Astana: Egor Pleshivtsev vs Arnav Vijay Paparkar",
-    "outcome": "Arnav Vijay Paparkar",
-    "outcome_index": 1,
+  "0x6801effa82b690577f00de82e9d057bd9bd4725bce1b6f28ef27d55d193f2ba2:Weibo Gaming:0x36d86e7539b04fbfba5b5d731a830325b02d14aadffed6d5d96453ba0873baae": {
+    "source_wallet": "0xf64e4932a8ef1dd3c45e8b1f675f630f0763a1dd",
+    "market_id": "0x6801effa82b690577f00de82e9d057bd9bd4725bce1b6f28ef27d55d193f2ba2",
+    "event_key": "lol-wb-lng-2026-08-08",
+    "market_question": "LoL: Weibo Gaming vs LNG Esports - Game 1 Winner",
+    "outcome": "Weibo Gaming",
+    "outcome_index": 0,
     "side": "BUY",
-    "entry_price": 0.5093,
+    "entry_price": 0.7879,
     "size_usd": 15.0,
     "fee_usd": 0.3,
     "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-15",
-    "opened_at": "2026-08-08T05:40:55.402502+00:00"
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-08T07:47:18.599292+00:00"
   }
 }
