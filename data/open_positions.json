@@ -1,34 +1,4 @@
 {
-  "0x0f0da51927fc7b605171b237422b01f26c6f48b2cd2626c6fe3eef402e32a503:EYEBALLERS:0xdf6e9961f6c245cceb412316810509263160a55ac0ff273d6cd208c80517265f": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0x0f0da51927fc7b605171b237422b01f26c6f48b2cd2626c6fe3eef402e32a503",
-    "event_key": "cs2-eye-pha-2026-08-08",
-    "market_question": "Counter-Strike: EYEBALLERS vs Phantom (BO3) - Esports World Cup Open Qualifier Group 10",
-    "outcome": "EYEBALLERS",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.548,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-08",
-    "opened_at": "2026-08-08T01:58:05.757181+00:00"
-  },
-  "0x8c7da3936b80f25a12bcd09a767602f62894baaf594a005685c2c21f967377df:DN SOOPers:0x6131945db8a7ec2a7cb64374bbcc5ee178cf2c725a4c6cb0e3e60d6dba8b9abf": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0x8c7da3936b80f25a12bcd09a767602f62894baaf594a005685c2c21f967377df",
-    "event_key": "lol-ns-dnf-2026-08-08",
-    "market_question": "LoL: Nongshim Red Force vs DN SOOPers - Game 1 Winner",
-    "outcome": "DN SOOPers",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.0303,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-08",
-    "opened_at": "2026-08-08T11:53:48.306222+00:00"
-  },
   "0xf5018dc35ca174ed4fb19a259fcd2d14d4b37bc754f67668bef96934d80245eb:Bilibili Gaming:0x6451c4a1640cb3711d43e414a94205d918c4d8eb09d5e41321eb11f3d5178bbc": {
     "source_wallet": "0x85d53efdd055aa88fb00a914f5615bfd585545ee",
     "market_id": "0xf5018dc35ca174ed4fb19a259fcd2d14d4b37bc754f67668bef96934d80245eb",
