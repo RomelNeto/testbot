@@ -58,5 +58,20 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-16",
     "opened_at": "2026-08-08T17:58:33.445868+00:00"
+  },
+  "0xd1d79f29e21ddb6798eea87c160ab2252cecb5e1035b7cf5a44149b96d000949:No:0xbd5b1f4398f934353438a87394152c44a4b05d487ca10d2349465280c79698a5": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0xd1d79f29e21ddb6798eea87c160ab2252cecb5e1035b7cf5a44149b96d000949",
+    "event_key": "bra-cor-cha-2026-08-08",
+    "market_question": "Will Associa\u00e7\u00e3o Chapecoense de Futebol win on 2026-08-08?",
+    "outcome": "No",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.8451,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-08T18:49:05.470653+00:00"
   }
 }
