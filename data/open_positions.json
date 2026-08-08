@@ -1,19 +1,4 @@
 {
-  "0x377d771fbb92cb291fefa615427826f82e66adbf27dd9b2f9142331ea8a6e087:Hanwha Life Esports:0x65b35a0823cf3e5419a61ba64425c9fde6197c406f4ed04fb0ec60c05a4c1e09": {
-    "source_wallet": "0x04b1e3aff4fed7a6868757761db7486ddb6cd224",
-    "market_id": "0x377d771fbb92cb291fefa615427826f82e66adbf27dd9b2f9142331ea8a6e087",
-    "event_key": "lol-t1-hle1-2026-08-08",
-    "market_question": "LoL: T1 vs Hanwha Life Esports (BO3) - LCK Round 3-4 Legend Group",
-    "outcome": "Hanwha Life Esports",
-    "outcome_index": 1,
-    "side": "SELL",
-    "entry_price": 0.4996,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": null,
-    "opened_at": "2026-08-07T21:09:51.702226+00:00"
-  },
   "0x0f0da51927fc7b605171b237422b01f26c6f48b2cd2626c6fe3eef402e32a503:EYEBALLERS:0xdf6e9961f6c245cceb412316810509263160a55ac0ff273d6cd208c80517265f": {
     "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
     "market_id": "0x0f0da51927fc7b605171b237422b01f26c6f48b2cd2626c6fe3eef402e32a503",
@@ -28,21 +13,6 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-08",
     "opened_at": "2026-08-08T01:58:05.757181+00:00"
-  },
-  "0xfe618c0cbeabbff551ff69f9d0faf3e902f1dd266a8dfce0f48b2d0820ca2b4d:Andrea Guerrieri:0x3722463cc35b9ac689ef9db4c467e770f17b282dedb61ed6aee2a639b39415e2": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0xfe618c0cbeabbff551ff69f9d0faf3e902f1dd266a8dfce0f48b2d0820ca2b4d",
-    "event_key": "atp-guerrie-glinka-2026-08-08",
-    "market_question": "Grodzisk Mazowiecki: Andrea Guerrieri vs Daniil Glinka",
-    "outcome": "Andrea Guerrieri",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.4368,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-15",
-    "opened_at": "2026-08-08T09:34:47.718901+00:00"
   },
   "0xaf0b29b5d886c367478efceb05fae8ec4ea2e6102b9199a340485477d60ca823:Marcel Zielinski:0x7c1e632f847f5b4d29e807cbcf355b74c3bbaf8adc52ab9eeb463917b266aed5": {
     "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
@@ -73,5 +43,20 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-08",
     "opened_at": "2026-08-08T10:29:54.912218+00:00"
+  },
+  "0x38ad053ab46d4aa91abc695fb39735f600383c35daa4ea141a968e77d2e54f1e:LGD Gaming:0xd6b3f88df6601d031f4be700b84e091405d2cd6810e95171907a4baa2e5984bb": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0x38ad053ab46d4aa91abc695fb39735f600383c35daa4ea141a968e77d2e54f1e",
+    "event_key": null,
+    "market_question": "LoL: LGD Gaming vs Anyone's Legend - Game 2 Winner",
+    "outcome": "LGD Gaming",
+    "outcome_index": 999,
+    "side": "BUY",
+    "entry_price": 0.2426,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-08T11:02:48.025910+00:00"
   }
 }
