@@ -29,19 +29,19 @@
     "estimated_close_date": "2026-08-08",
     "opened_at": "2026-08-08T01:58:05.757181+00:00"
   },
-  "0x6801effa82b690577f00de82e9d057bd9bd4725bce1b6f28ef27d55d193f2ba2:Weibo Gaming:0x36d86e7539b04fbfba5b5d731a830325b02d14aadffed6d5d96453ba0873baae": {
-    "source_wallet": "0xf64e4932a8ef1dd3c45e8b1f675f630f0763a1dd",
-    "market_id": "0x6801effa82b690577f00de82e9d057bd9bd4725bce1b6f28ef27d55d193f2ba2",
-    "event_key": "lol-wb-lng-2026-08-08",
-    "market_question": "LoL: Weibo Gaming vs LNG Esports - Game 1 Winner",
-    "outcome": "Weibo Gaming",
-    "outcome_index": 0,
+  "0xbddca37384096eb5bb7597246b622a809aca39f04c17291af836720d3d954419:Wolves Esports:0xbf288ebf2e1434d0e4e0c3b8e44a407694d9fa7938e23c6aec3bb935d648ba63": {
+    "source_wallet": "0xeac22222ef8d2be457c00101a1a4e4925ec5dddc",
+    "market_id": "0xbddca37384096eb5bb7597246b622a809aca39f04c17291af836720d3d954419",
+    "event_key": "val-at1-wol-2026-08-08",
+    "market_question": "Valorant: A Team vs Wolves Esports - Map 1 Winner",
+    "outcome": "Wolves Esports",
+    "outcome_index": 1,
     "side": "BUY",
-    "entry_price": 0.7879,
+    "entry_price": 0.3536,
     "size_usd": 15.0,
     "fee_usd": 0.3,
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-08",
-    "opened_at": "2026-08-08T07:47:18.599292+00:00"
+    "opened_at": "2026-08-08T08:37:12.946086+00:00"
   }
 }
