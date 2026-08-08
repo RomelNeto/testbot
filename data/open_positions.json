@@ -44,21 +44,6 @@
     "estimated_close_date": "2026-08-09",
     "opened_at": "2026-08-08T15:37:38.817727+00:00"
   },
-  "0xc0d4b45343bc78ae8da917972e18cfbe455e3db50fb3019f85477949bfd1b8e0:Iga Swiatek:0x84cd2032324c55f6cfce54659d6d559ccea6b4dab1e1121d8ddc41050504b9a8": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0xc0d4b45343bc78ae8da917972e18cfbe455e3db50fb3019f85477949bfd1b8e0",
-    "event_key": "wta-kostyuk-swiatek-2026-08-09",
-    "market_question": "National Bank Open: Marta Kostyuk vs Iga Swiatek",
-    "outcome": "Iga Swiatek",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.397,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-16",
-    "opened_at": "2026-08-08T17:58:33.445868+00:00"
-  },
   "0xd1d79f29e21ddb6798eea87c160ab2252cecb5e1035b7cf5a44149b96d000949:No:0xbd5b1f4398f934353438a87394152c44a4b05d487ca10d2349465280c79698a5": {
     "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
     "market_id": "0xd1d79f29e21ddb6798eea87c160ab2252cecb5e1035b7cf5a44149b96d000949",
@@ -73,5 +58,35 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-08",
     "opened_at": "2026-08-08T18:49:05.470653+00:00"
+  },
+  "0x1c061ccb2863b66b5c83dea496aa062690903813ae604b9a94a89fbd5b4df2fb:Jessica Pegula:0xe7c8d6421221e0f820ee74f12bc3d94ea3671584082d2811039fa691b7d15c24": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0x1c061ccb2863b66b5c83dea496aa062690903813ae604b9a94a89fbd5b4df2fb",
+    "event_key": "wta-pegula-shnaide-2026-08-09",
+    "market_question": "National Bank Open: Jessica Pegula vs Diana Shnaider",
+    "outcome": "Jessica Pegula",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.7517,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-16",
+    "opened_at": "2026-08-08T19:27:15.288011+00:00"
+  },
+  "0x2253df44a0be8994ce099748c19f33fc341d9170919c18ad3d980e73e6916cd6:Amaru Gaming:0x2b3a519c6dba8843d695ffb64a7cef85c22659156c56e94648e62ee063294281": {
+    "source_wallet": "0x57b4520916577bfb64f93cdee2eba6709301b46b",
+    "market_id": "0x2253df44a0be8994ce099748c19f33fc341d9170919c18ad3d980e73e6916cd6",
+    "event_key": "dota2-amaru-jenz-2026-07-28",
+    "market_question": "Dota 2: Amaru Gaming vs Team Jenz - Game 1 Winner",
+    "outcome": "Amaru Gaming",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.5159,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-09",
+    "opened_at": "2026-08-08T19:27:16.215866+00:00"
   }
 }
