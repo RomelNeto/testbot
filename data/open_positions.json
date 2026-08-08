@@ -28,5 +28,35 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-14",
     "opened_at": "2026-08-07T23:58:04.235429+00:00"
+  },
+  "0x2e6664d59042c60b97d7ab05a8646f514aa2c7a8542154baa887ba369ad0989e:Learner Tien:0x04306b8c9d96e89345f3833aa6aa9c7857197a7368b715d250cfe2257e6181bd": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0x2e6664d59042c60b97d7ab05a8646f514aa2c7a8542154baa887ba369ad0989e",
+    "event_key": "atp-tien-paul-2026-08-07",
+    "market_question": "National Bank Open: Learner Tien vs Tommy Paul",
+    "outcome": "Learner Tien",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.5162,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-14",
+    "opened_at": "2026-08-08T01:58:05.086095+00:00"
+  },
+  "0x0f0da51927fc7b605171b237422b01f26c6f48b2cd2626c6fe3eef402e32a503:EYEBALLERS:0xdf6e9961f6c245cceb412316810509263160a55ac0ff273d6cd208c80517265f": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0x0f0da51927fc7b605171b237422b01f26c6f48b2cd2626c6fe3eef402e32a503",
+    "event_key": "cs2-eye-pha-2026-08-08",
+    "market_question": "Counter-Strike: EYEBALLERS vs Phantom (BO3) - Esports World Cup Open Qualifier Group 10",
+    "outcome": "EYEBALLERS",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.548,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-08T01:58:05.757181+00:00"
   }
 }
