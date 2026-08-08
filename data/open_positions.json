@@ -43,5 +43,20 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-09",
     "opened_at": "2026-08-08T15:37:38.817727+00:00"
+  },
+  "0xc0d4b45343bc78ae8da917972e18cfbe455e3db50fb3019f85477949bfd1b8e0:Iga Swiatek:0x84cd2032324c55f6cfce54659d6d559ccea6b4dab1e1121d8ddc41050504b9a8": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0xc0d4b45343bc78ae8da917972e18cfbe455e3db50fb3019f85477949bfd1b8e0",
+    "event_key": "wta-kostyuk-swiatek-2026-08-09",
+    "market_question": "National Bank Open: Marta Kostyuk vs Iga Swiatek",
+    "outcome": "Iga Swiatek",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.397,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-16",
+    "opened_at": "2026-08-08T17:58:33.445868+00:00"
   }
 }
