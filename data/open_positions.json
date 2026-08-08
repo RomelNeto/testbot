@@ -43,5 +43,35 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-15",
     "opened_at": "2026-08-08T09:34:47.718901+00:00"
+  },
+  "0xaf0b29b5d886c367478efceb05fae8ec4ea2e6102b9199a340485477d60ca823:Marcel Zielinski:0x7c1e632f847f5b4d29e807cbcf355b74c3bbaf8adc52ab9eeb463917b266aed5": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0xaf0b29b5d886c367478efceb05fae8ec4ea2e6102b9199a340485477d60ca823",
+    "event_key": "itf-orlov-zielins-2026-08-08",
+    "market_question": "ITF Bielsko Biala: Vladyslav Orlov vs Marcel Zielinski",
+    "outcome": "Marcel Zielinski",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.5605,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-15",
+    "opened_at": "2026-08-08T10:29:51.298348+00:00"
+  },
+  "0xd354afc5d97397984161de875f8b85d2e2fa769ae1469e9df896485a1b193ee5:A Team:0x8aa217a5bbc7cd79f7031bfd702108b34a66118a950c43640461328addccafc1": {
+    "source_wallet": "0xeac22222ef8d2be457c00101a1a4e4925ec5dddc",
+    "market_id": "0xd354afc5d97397984161de875f8b85d2e2fa769ae1469e9df896485a1b193ee5",
+    "event_key": "val-at1-wol-2026-08-08",
+    "market_question": "Valorant: A Team vs Wolves Esports (BO3) - VCT China Stage 2 Play-Ins",
+    "outcome": "A Team",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.3096,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-08T10:29:54.912218+00:00"
   }
 }
