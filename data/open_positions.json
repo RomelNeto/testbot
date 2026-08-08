@@ -43,5 +43,50 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-08",
     "opened_at": "2026-08-08T14:29:25.067127+00:00"
+  },
+  "0x7d4753ed5e6f517525ec7b325c19b8dd9c5d9899a2e74099292a8d52b129c710:Ayana Akli:0x3a94b58412854c7cedb79084ae02aaf4e66f851757dfa9bc484f3d66bb060fab": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0x7d4753ed5e6f517525ec7b325c19b8dd9c5d9899a2e74099292a8d52b129c710",
+    "event_key": "itf-akli-zakharo-2026-08-08",
+    "market_question": "ITF Landisville: Ayana Akli vs Anastasia Zakharova",
+    "outcome": "Ayana Akli",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.1721,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-15",
+    "opened_at": "2026-08-08T15:00:05.190198+00:00"
+  },
+  "0xc1c1bb0334acd18af62948cd2cf65a266bed45e6ffec80916e8aea6c70365624:No:0x81434ddc9625f43a5e44d6ed1c04b659935feb7ec3aca40d835f3d734838af9b": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0xc1c1bb0334acd18af62948cd2cf65a266bed45e6ffec80916e8aea6c70365624",
+    "event_key": "bra-cre-cam-2026-08-08",
+    "market_question": "Will CA Mineiro win on 2026-08-08?",
+    "outcome": "No",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.6424,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-08T15:00:05.608612+00:00"
+  },
+  "0xd5ae0edccc1fc1f0025da0f90658d7f4bdb1b9ebc46b68dc742d34425837b684:BASEMENT BOYS:0x4e89c3d31c1490dda17d4a27bdd412c59e27b7871f9281329a67bae203afca37": {
+    "source_wallet": "0xeac22222ef8d2be457c00101a1a4e4925ec5dddc",
+    "market_id": "0xd5ae0edccc1fc1f0025da0f90658d7f4bdb1b9ebc46b68dc742d34425837b684",
+    "event_key": "cs2-1win-bmb-2026-08-08",
+    "market_question": "Counter-Strike: 1WIN vs BASEMENT BOYS - Map 1 Winner",
+    "outcome": "BASEMENT BOYS",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.0607,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-08T15:00:06.797543+00:00"
   }
 }
