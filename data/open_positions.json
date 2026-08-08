@@ -1,1 +1,47 @@
-{}
+{
+  "0x271fab9282a122e88c0dee3b3348a1ecfd9feecef5a9887909284530b5f56d87:Zsombor Piros:0x6619b1cc410e3c63a02a6aa1257816c1f84f18b668e57cba200e54870699a261": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0x271fab9282a122e88c0dee3b3348a1ecfd9feecef5a9887909284530b5f56d87",
+    "event_key": "atp-gentzsc-piros-2026-08-08",
+    "market_question": "Hagen: Tom Gentzsch vs Zsombor Piros",
+    "outcome": "Zsombor Piros",
+    "outcome_index": 1,
+    "side": "BUY",
+    "entry_price": 0.5875,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-15",
+    "opened_at": "2026-08-08T14:29:23.828009+00:00"
+  },
+  "0x4acaa5ac6a3715272fec46324b639ef1638a0280b9917403ada8e028896dea51:Infinite:0xad1e8c542095916be866a4e611d585d2460f7712ec660fdec8b74beae50be76a": {
+    "source_wallet": "0x57b4520916577bfb64f93cdee2eba6709301b46b",
+    "market_id": "0x4acaa5ac6a3715272fec46324b639ef1638a0280b9917403ada8e028896dea51",
+    "event_key": "cs2-inf6-gpn-2026-08-08",
+    "market_question": "Counter-Strike: Infinite vs Giant Pandas (BO3) - Esports World Cup Open Qualifier Group 5",
+    "outcome": "Infinite",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.56,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-08T14:29:24.586308+00:00"
+  },
+  "0x3faf1a6cb30344019796851b6a41e7a08925e45431f6422ee39211b8bacf5a15:Black Phoenix:0x616c7a99d4ada0016c9e8f2e3af1bb62b2edb7aa903218a8b221e8df8c82440b": {
+    "source_wallet": "0x57b4520916577bfb64f93cdee2eba6709301b46b",
+    "market_id": "0x3faf1a6cb30344019796851b6a41e7a08925e45431f6422ee39211b8bacf5a15",
+    "event_key": "cs2-blackp-cs1-2026-08-08",
+    "market_question": "Counter-Strike: Black Phoenix vs CYBERSHOKE Esports (BO3) - CCT Europe Series #6 Playoffs",
+    "outcome": "Black Phoenix",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.6517,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-08",
+    "opened_at": "2026-08-08T14:29:25.067127+00:00"
+  }
+}
