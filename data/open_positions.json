@@ -14,36 +14,6 @@
     "estimated_close_date": null,
     "opened_at": "2026-08-07T21:09:51.702226+00:00"
   },
-  "0x71fa2b9df79ae3aed7721dfde68b16673f191b93cfcc24909ccd237fbe1a334c:Pittsburgh Pirates:0x76f3998e5f039640d51f50bc572df96154c2f3ea5dc6f07dd9874161bbe82155": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0x71fa2b9df79ae3aed7721dfde68b16673f191b93cfcc24909ccd237fbe1a334c",
-    "event_key": "mlb-nym-pit-2026-08-07",
-    "market_question": "New York Mets vs. Pittsburgh Pirates",
-    "outcome": "Pittsburgh Pirates",
-    "outcome_index": 1,
-    "side": "BUY",
-    "entry_price": 0.3966,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-14",
-    "opened_at": "2026-08-07T23:58:04.235429+00:00"
-  },
-  "0x2e6664d59042c60b97d7ab05a8646f514aa2c7a8542154baa887ba369ad0989e:Learner Tien:0x04306b8c9d96e89345f3833aa6aa9c7857197a7368b715d250cfe2257e6181bd": {
-    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
-    "market_id": "0x2e6664d59042c60b97d7ab05a8646f514aa2c7a8542154baa887ba369ad0989e",
-    "event_key": "atp-tien-paul-2026-08-07",
-    "market_question": "National Bank Open: Learner Tien vs Tommy Paul",
-    "outcome": "Learner Tien",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.5162,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-14",
-    "opened_at": "2026-08-08T01:58:05.086095+00:00"
-  },
   "0x0f0da51927fc7b605171b237422b01f26c6f48b2cd2626c6fe3eef402e32a503:EYEBALLERS:0xdf6e9961f6c245cceb412316810509263160a55ac0ff273d6cd208c80517265f": {
     "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
     "market_id": "0x0f0da51927fc7b605171b237422b01f26c6f48b2cd2626c6fe3eef402e32a503",
@@ -58,5 +28,35 @@
     "net_invested_usd": 14.7,
     "estimated_close_date": "2026-08-08",
     "opened_at": "2026-08-08T01:58:05.757181+00:00"
+  },
+  "0xa73955ebdf4e8d95eb2c2211552c6890ca837aa5094c4c12b8005323c102edef:Houston Astros:0x889c3f0cd0b33db26891ae0260144c40c1678034670a615adf322fcd91c0e931": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0xa73955ebdf4e8d95eb2c2211552c6890ca837aa5094c4c12b8005323c102edef",
+    "event_key": "mlb-hou-sd-2026-08-07",
+    "market_question": "Houston Astros vs. San Diego Padres",
+    "outcome": "Houston Astros",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.68,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-15",
+    "opened_at": "2026-08-08T03:38:08.554449+00:00"
+  },
+  "0x282e701965ef88eef5e9b68ea319a149be244ec605ae4f1968c7994476d54f31:Los Angeles Dodgers:0x7eba5605610ea039f5a5c088990e4b0841b8caf7c4f1abc290c54ffc52430840": {
+    "source_wallet": "0x2c335066fe58fe9237c3d3dc7b275c2a034a0563",
+    "market_id": "0x282e701965ef88eef5e9b68ea319a149be244ec605ae4f1968c7994476d54f31",
+    "event_key": "mlb-lad-ari-2026-08-07",
+    "market_question": "Los Angeles Dodgers vs. Arizona Diamondbacks",
+    "outcome": "Los Angeles Dodgers",
+    "outcome_index": 0,
+    "side": "BUY",
+    "entry_price": 0.4165,
+    "size_usd": 15.0,
+    "fee_usd": 0.3,
+    "net_invested_usd": 14.7,
+    "estimated_close_date": "2026-08-15",
+    "opened_at": "2026-08-08T03:38:09.830660+00:00"
   }
 }
