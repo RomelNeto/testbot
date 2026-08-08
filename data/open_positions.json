@@ -1,17 +1,1 @@
-{
-  "0xf5018dc35ca174ed4fb19a259fcd2d14d4b37bc754f67668bef96934d80245eb:Bilibili Gaming:0x6451c4a1640cb3711d43e414a94205d918c4d8eb09d5e41321eb11f3d5178bbc": {
-    "source_wallet": "0x85d53efdd055aa88fb00a914f5615bfd585545ee",
-    "market_id": "0xf5018dc35ca174ed4fb19a259fcd2d14d4b37bc754f67668bef96934d80245eb",
-    "event_key": "lol-blg-edg-2026-08-08",
-    "market_question": "Game Handicap: BLG (-1.5) vs EDward Gaming (+1.5)",
-    "outcome": "Bilibili Gaming",
-    "outcome_index": 0,
-    "side": "BUY",
-    "entry_price": 0.6948,
-    "size_usd": 15.0,
-    "fee_usd": 0.3,
-    "net_invested_usd": 14.7,
-    "estimated_close_date": "2026-08-08",
-    "opened_at": "2026-08-08T11:53:51.020177+00:00"
-  }
-}
+{}
